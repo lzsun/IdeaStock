@@ -120,6 +120,9 @@ return _highlightedImage;
                                       self.bounds.size.width * TEXT_WIDHT_RATIO, self.bounds.size.height * TEXT_HEIGHT_RATIO);
         UITextView * textView = [[UITextView alloc] initWithFrame:textFrame];
         textView.font = [UIFont fontWithName:@"Cochin" size:17.0];
+        
+        [textView setBackgroundColor:[UIColor clearColor]];
+        
         textView.editable = NO;
         [self addSubview:imageView];
         [self addSubview:textView];
@@ -162,6 +165,8 @@ return _highlightedImage;
                                           self.bounds.size.width * TEXT_WIDHT_RATIO, self.bounds.size.height * TEXT_HEIGHT_RATIO);
             UITextView * textView = [[UITextView alloc] initWithFrame:textFrame];
             textView.font = [UIFont fontWithName:@"Cochin" size:17.0];
+            [textView setBackgroundColor:[UIColor clearColor]];
+            
             textView.text = oldText;
             
             //posisble memory leakage?

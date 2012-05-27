@@ -13,7 +13,8 @@
 #import "StackViewController.h"
 #import "BulletinBoardNote.h"
 #import "XoomlAttributeHelper.h"
-
+#import <MobileCoreServices/UTCoreTypes.h>
+#import "ImageView.h"
 
 @interface BulletinBoardViewController ()
 
@@ -898,6 +899,30 @@
      UIColor * color = [UIColor colorWithPatternImage:image];*/
     [self.bulletinboardView setBackgroundColor:[UIColor clearColor]];
 }
+
+- (IBAction)cameraPressed:(id)sender {
+    
+    //check to see if camera is available
+    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]){
+        return;
+    }
+    
+    NSArray * mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
+    if (![mediaTypes containsObject:(NSString *) kUTTypeImage]) return;
+    
+    UIImagePickerController * imagePicker = [[UIImagePickerController alloc] init];
+    imagePicker.delegate = self;
+    imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    imagePicker.mediaTypes = [NSArray arrayWithObject:(NSString *) kUTTypeImage];
+    imagePicker.allowsEditing = YES;
+    
+    [self presentModalViewController:imagePicker animated:YES];
+    
+    //configure it 
+    //present it 
+    //have the delegate deal with events
+}
+
 -(void) viewDidLoad
 {
     
@@ -905,7 +930,9 @@
     self.deleteButton = [[self.toolbar items] objectAtIndex:len - 1];
     self.expandButton = [[self.toolbar items] objectAtIndex:len - 2];
     NSMutableArray * toolBarItems = [[NSMutableArray alloc] init];
-    for ( int i = 0 ; i < 5 ; i++){
+    
+    int remainingCount = [[self.toolbar items] count] -2; 
+    for ( int i = 0 ; i < remainingCount ; i++){
         [toolBarItems addObject:[[self.toolbar items] objectAtIndex:i]];
     }
     self.toolbar.items = [toolBarItems copy];
@@ -1135,5 +1162,47 @@
     }
 }
 
+/*--------------------------------------------------------------
+ 
+                            imagePickerController delegate
+ 
+ --------------------------------------------------------------*/
 
+-(void) imagePickerControllerDidCancel:(UIImagePickerController *)picker{
+    [self dismissModalViewControllerAnimated:YES];
+}
+
+#define IMAGE_WIDTH 300
+#define IMAGE_HEIGH 250
+-(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo{
+    [self dismissModalViewControllerAnimated:YES];
+    CGRect frame = CGRectMake(self.bulletinboardView.frame.origin.x,
+                              self.bulletinboardView.frame.origin.y,
+                              IMAGE_WIDTH, 
+                              IMAGE_HEIGH);
+    
+    ImageView * note = [[ImageView alloc] initWithFrame:frame 
+                                               andImage:image 
+                                                  andID:[XoomlAttributeHelper generateUUID]];
+    
+    note.transform = CGAffineTransformScale(note.transform, 10, 10);
+    note.alpha = 0;
+    note.delegate = self;
+    
+    [UIView animateWithDuration:0.25 animations:^{
+        note.transform = CGAffineTransformScale(note.transform, 0.1, 0.1);
+        note.alpha = 1;
+    }];
+    
+    [self.bulletinboardView addSubview:note];
+    UIPanGestureRecognizer * gr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(objectPanned:)];
+    UIPinchGestureRecognizer * pgr = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(objectPinched:)];
+    UILongPressGestureRecognizer * lpgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(objectPressed:)];
+    
+    [note addGestureRecognizer:lpgr];
+    [note addGestureRecognizer:gr];
+    [note addGestureRecognizer:pgr];
+    
+   // [self addNoteToModel:note];
+}
 @end
