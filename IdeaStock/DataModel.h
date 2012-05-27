@@ -57,6 +57,15 @@
  ToBulletinBoard: (NSString *) bulletinBoardName; 
 
 
+@optional
+
+-(void) addImageNote: (NSString *) noteName 
+     withNoteContent: (NSData *) note 
+            andImage: (NSData *) img 
+   withImageFileName: (NSString *)imgName
+     toBulletinBoard: (NSString *) bulletinBoardName;
+
+
 /*----------------------
  Update Behavior
  -----------------------*/

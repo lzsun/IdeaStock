@@ -51,6 +51,7 @@
 
 /*====================================================================*/
 
+
 @implementation AssociativeBulletinBoard
 
 /*--------------------------------------------------
@@ -66,6 +67,7 @@
 @synthesize bulletinBoardAttributes = _bulletinBoardAttributes;
 @synthesize noteContents = _noteContents;
 @synthesize bulletinBoardName = _bulletinBoardName;
+@synthesize noteImages = _noteImages;
 
 -(BulletinBoardAttributes *) bulletinBoardAttributes{
     if (!_bulletinBoardAttributes){
@@ -86,6 +88,13 @@
         _noteContents = [NSMutableDictionary dictionary];
     }
     return _noteContents;
+}
+
+-(NSMutableDictionary *) noteImages{
+    if (!_noteImages){
+        _noteImages = [NSMutableDictionary dictionary];
+    }
+    return _noteImages;
 }
 
 
@@ -356,7 +365,6 @@
     [noteAttribute createAttributeWithName:POSITION_Y forAttributeType:POSITION_TYPE andValues:[NSArray arrayWithObject:positionY]];
     [noteAttribute createAttributeWithName:IS_VISIBLE forAttributeType:VISIBILITY_TYPE andValues:[NSArray arrayWithObject:isVisible]];
     
-    NSLog(@"%@",[noteAttribute getAllAttributes]);
     [self.noteAttributes setObject:noteAttribute forKey:noteID];
     
     //update the datamodel
@@ -365,6 +373,62 @@
     
 }
 
+- (void) addImageNoteContent:(id <Note> )note 
+               andProperties:properties
+                    andImage: (NSData *) img{
+    //get note Name and note ID if they are not present throw an exception
+    NSString * noteID = [properties objectForKey:NOTE_ID];
+    NSString * noteName = [properties  objectForKey:NOTE_NAME];
+    if (!noteID || !noteName) [NSException raise:NSInvalidArgumentException
+                                          format:@"A Values is missing from the required properties dictionary"];
+    
+    //set the note content for the noteID
+    [self.noteContents setObject:note forKey:noteID];
+    
+    //get other optional properties for the note. 
+    //If they are not present use default values
+    NSString * positionX = [properties objectForKey:POSITION_X];
+    if (!positionX) positionX = DEFAULT_X_POSITION;
+    NSString * positionY = [properties objectForKey:POSITION_Y];
+    if (!positionY) positionY = DEFAULT_Y_POSITION;
+    NSString * isVisible = [properties objectForKey:IS_VISIBLE];
+    if(!isVisible) isVisible = DEFAULT_VISIBILITY;
+    
+    //create a dictionary of note properties
+    NSDictionary *noteProperties = [NSDictionary dictionaryWithObjectsAndKeys:noteName,NOTE_NAME,
+                                    noteID,NOTE_ID,
+                                    positionX,POSITION_X,
+                                    positionY, POSITION_Y,
+                                    isVisible,IS_VISIBLE,
+                                    nil];
+    
+    //have the delegate hold the structural information about the note
+    [self.delegate addNoteWithID:noteID andProperties:noteProperties];
+    
+    //have the notes bulletin board attribute list for the note hold the note
+    //properties
+    BulletinBoardAttributes * noteAttribute = [self createBulletinBoardAttributeForNotes];
+    [noteAttribute createAttributeWithName:NOTE_NAME forAttributeType: NOTE_NAME_TYPE andValues:[NSArray arrayWithObject: noteName ]];
+    [noteAttribute createAttributeWithName:POSITION_X forAttributeType: POSITION_TYPE andValues:[NSArray arrayWithObject: positionX ]];
+    [noteAttribute createAttributeWithName:POSITION_Y forAttributeType:POSITION_TYPE andValues:[NSArray arrayWithObject:positionY]];
+    [noteAttribute createAttributeWithName:IS_VISIBLE forAttributeType:VISIBILITY_TYPE andValues:[NSArray arrayWithObject:isVisible]];
+    
+    [self.noteAttributes setObject:noteAttribute forKey:noteID];
+    
+    [self.noteImages setObject:img forKey:noteID];
+    
+    NSData * noteData = [XoomlParser convertImageNoteToXooml:note];
+    NSString * imgName = [XoomlParser getImageFileName: note];
+    
+    [self.dataModel addImageNote: noteName 
+                 withNoteContent: noteData 
+                        andImage: img 
+               withImageFileName: imgName
+                 toBulletinBoard:self.bulletinBoardName];
+
+    
+    
+}
 
 -(void) addNoteAttribute: (NSString *) attributeName
          forAttributeType: (NSString *) attributeType

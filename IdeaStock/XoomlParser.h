@@ -32,6 +32,7 @@
 //TODO maybe I should just return NSData * here too.
 + (BulletinBoardNote *) xoomlNoteFromXML: (NSData *)data;
 
+
 + (DDXMLElement *) xoomlForAssociationToolAttributeWithName: (NSString *) attributeName 
 
                                                     andType: (NSString *) attributeType; 
@@ -66,6 +67,9 @@
  */
 + (NSData *) convertNoteToXooml: (BulletinBoardNote *) note;
 
++ (NSString *) getImageFileName: (BulletinBoardNote *) note;
+
++ (NSData *) convertImageNoteToXooml:(BulletinBoardNote *) note;
 /*
  Creates the boilerplate Xooml bulletin baord document
  and returns it as NSData

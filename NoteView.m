@@ -200,6 +200,7 @@
             
             [textView setBackgroundColor:[UIColor clearColor]];
             
+            textView.textColor = ((UITextView *)subView).textColor;
             textView.text = oldText;
             
             textView.delegate = self;
@@ -227,6 +228,7 @@
                                                   self.bounds.size.width * TEXT_WIDHT_RATIO, self.bounds.size.height * TEXT_HEIGHT_RATIO);
                     UITextView * textView = [[UITextView alloc] initWithFrame:textFrame];
                     textView.font = [UIFont fontWithName:@"Cochin" size:17.0];
+                    textView.textColor = ((UITextView *)subView).textColor;
                     
                     [textView setBackgroundColor:[UIColor clearColor]];
                     
@@ -255,7 +257,9 @@
                                               self.bounds.origin.y + self.bounds.size.height * STARTING_POS_OFFSET_Y,
                                               self.bounds.size.width * TEXT_WIDHT_RATIO, self.bounds.size.height * TEXT_HEIGHT_RATIO);
                 UITextView * textView = [[UITextView alloc] initWithFrame:textFrame];
-
+                
+                textView.textColor = ((UITextView *)subView).textColor;
+                [textView setBackgroundColor:[UIColor clearColor]];
                 
                 textView.text = oldText;
                 

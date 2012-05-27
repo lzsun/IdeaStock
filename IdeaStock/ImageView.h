@@ -10,6 +10,8 @@
 
 @interface ImageView : NoteView
 
+@property UIImage *image;
+
 -(id) initWithFrame:(CGRect)frame
            andImage: (UIImage *) image;
 

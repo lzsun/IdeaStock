@@ -222,7 +222,7 @@
 #define POSITION_TYPE @"position"
 #define STACKING_TYPE @"stacking"
 
--(void) addNoteToModel: (NoteView *) note{
+-(NSString *) addNoteToModel: (NoteView *) note{
     
     NSString * noteTextID = [XoomlAttributeHelper generateUUID];
     NSString * creationDate = [XoomlAttributeHelper generateCurrentTimeForXooml];
@@ -239,6 +239,33 @@
     
     [self.board addNoteContent:noteItem andProperties:noteProperties];
     note.ID = noteID;
+    
+    return noteID;
+}
+
+//0 is the max
+#define IMG_COMPRESSION_QUALITY 0.5
+-(NSString *) addImageNoteToModel: (ImageView *) note{
+    
+    NSString * noteTextID = [XoomlAttributeHelper generateUUID];
+    NSString * creationDate = [XoomlAttributeHelper generateCurrentTimeForXooml];
+    NSString * noteID = [XoomlAttributeHelper generateUUID];
+    
+    NSString * noteName = [NSString stringWithFormat:@"Note%d",self.noteCount];
+    self.noteCount++;
+    NSString * positionX = [NSString stringWithFormat:@"%f", note.frame.origin.x];
+    NSStream * positionY = [NSString stringWithFormat:@"%f", note.frame.origin.y];
+    
+    NSDictionary * noteProperties =[[NSDictionary alloc] initWithObjectsAndKeys:noteName,@"name",noteID,@"ID",positionX,@"positionX",positionY, @"positionY",@"true", @"isVisible",nil];
+    BulletinBoardNote * noteItem = [[BulletinBoardNote alloc] initEmptyNoteWithID:noteTextID andDate:creationDate];
+    noteItem.noteText = note.text;
+    NSData * imgData = UIImageJPEGRepresentation(note.image, IMG_COMPRESSION_QUALITY);
+    
+    [self.board addImageNoteContent:noteItem andProperties:noteProperties andImage: imgData];
+    
+    note.ID = noteID;
+    
+    return noteID;
 }
 
 -(void) updateNoteLocation:(NoteView *) view{
@@ -303,7 +330,6 @@
 
 -(void) loadSavedNotes: (NSNotification *) notificatoin{
     
-    NSLog(@"Here");
     [self layoutNotes];
 }
 
@@ -1172,18 +1198,16 @@
     [self dismissModalViewControllerAnimated:YES];
 }
 
-#define IMAGE_WIDTH 300
-#define IMAGE_HEIGH 250
+
 -(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo{
     [self dismissModalViewControllerAnimated:YES];
     CGRect frame = CGRectMake(self.bulletinboardView.frame.origin.x,
                               self.bulletinboardView.frame.origin.y,
-                              IMAGE_WIDTH, 
-                              IMAGE_HEIGH);
+                              NOTE_WIDTH, 
+                              NOTE_HEIGHT);
     
     ImageView * note = [[ImageView alloc] initWithFrame:frame 
-                                               andImage:image 
-                                                  andID:[XoomlAttributeHelper generateUUID]];
+                                               andImage:image];
     
     note.transform = CGAffineTransformScale(note.transform, 10, 10);
     note.alpha = 0;
@@ -1203,6 +1227,7 @@
     [note addGestureRecognizer:gr];
     [note addGestureRecognizer:pgr];
     
-   // [self addNoteToModel:note];
+    [self addImageNoteToModel: note];
+
 }
 @end

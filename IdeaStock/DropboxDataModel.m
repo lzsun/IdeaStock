@@ -14,6 +14,7 @@
 #define UPDATE_BULLETIN_BOARD_ACTION @"addBulletinBoard"
 #define ADD_NOTE_ACTION @"addNote"
 #define UPDATE_NOTE_ACTION @"updateNote"
+#define ADD_IMAGE_NOTE_ACTION @"addImage"
 
 
 @interface DropboxDataModel()
@@ -35,6 +36,7 @@
 
 @property NSString * action;
 @property NSString * actionPath;
+@property NSString * actionFileName;
 @property NSString * actionBulletinBoardName;
 @property NSString * actionNoteName;
 
@@ -56,6 +58,7 @@
 @synthesize actionPath = _actionPath;
 @synthesize actionBulletinBoardName = _actionBulletinBoardName;
 @synthesize actionNoteName = _actionNoteName;
+@synthesize actionFileName = _actionFileName;
 
 -(DBRestClient *) restClient{
     if (!_restClient){
@@ -132,6 +135,7 @@
     NSError * err;
     //first write the note to the disk
     NSString * path = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
+    
     [FileSystemHelper createMissingDirectoryForPath:path];
     BOOL didWrite = [note writeToFile:path options:NSDataWritingAtomic error:&err];
     if (!didWrite){
@@ -163,6 +167,49 @@
     
 }
 
+-(void) addImageNote: (NSString *) noteName 
+     withNoteContent: (NSData *) note 
+            andImage: (NSData *) img 
+            withImageFileName:(NSString *)imgName
+     toBulletinBoard: (NSString *) bulletinBoardName{
+    
+    
+    NSError * err;
+    NSString * path = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
+    self.actionPath = path;
+    
+    [FileSystemHelper createMissingDirectoryForPath:path];
+    BOOL didWrite = [note writeToFile:path options:NSDataWritingAtomic error:&err];
+    
+    if (!didWrite){
+        NSLog(@"Error in writing to file system: %@", err);
+        return;
+    }
+    
+    path = [path stringByDeletingLastPathComponent];
+    path = [path stringByAppendingFormat:@"/%@",imgName];
+    
+    didWrite = [img writeToFile:path options:NSDataWritingAtomic error:&err];
+    
+    if (!didWrite){
+        NSLog(@"Error in writing to file system: %@", err);
+        return;
+    }
+    
+    self.tempDel = self.delegate;
+    
+    self.restClient.delegate = self;
+    
+    self.action = ADD_IMAGE_NOTE_ACTION;
+    self.actionBulletinBoardName = bulletinBoardName;
+    self.actionNoteName = noteName;
+    self.actionFileName =imgName;
+    
+    NSString * destination = [NSString stringWithFormat: @"/%@/%@", bulletinBoardName, noteName];
+    
+    //the rest is done for loadedMetadata method
+    [self.restClient createFolder: destination];
+}
 /*--------------------------------------------------
  
                     Update Methods
@@ -395,10 +442,17 @@ loadMetadataFailedWithError:(NSError *)error {
     
     //TODO Right now Im assuming that there would not be consequetive add notes so there is no need for queue if this turns out wrong
     //I will need to implement something like the queue mechanism for update note. 
-    if([self.action isEqualToString:ADD_NOTE_ACTION]){
+    if([self.action isEqualToString:ADD_NOTE_ACTION] ||
+       [self.action isEqualToString:ADD_IMAGE_NOTE_ACTION]){
         NSLog(@"Folder Created for note: %@", self.actionNoteName);
         NSString * path = [folder path];
+        
+        
         NSString * sourcePath = self.actionPath;
+        BOOL isImage = [self.action isEqualToString:ADD_IMAGE_NOTE_ACTION] ? YES: NO;
+        
+        
+        
         //pop the self action and its path
         self.action = nil; 
         self.actionPath = nil;
@@ -408,6 +462,15 @@ loadMetadataFailedWithError:(NSError *)error {
         
 
         [self.restClient uploadFile:NOTE_XOOML_FILE_NAME toPath:path withParentRev:nil fromPath:sourcePath];
+        
+        if (isImage){
+            
+            
+            NSString *imgPath = [sourcePath stringByDeletingLastPathComponent];
+            imgPath = [imgPath stringByAppendingFormat:@"/%@",self.actionFileName];
+            [self.restClient uploadFile:self.actionFileName toPath:path withParentRev:nil fromPath:imgPath];
+            self.actionFileName = nil;
+        }
     }
 }
 

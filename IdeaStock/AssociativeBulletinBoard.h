@@ -52,6 +52,12 @@
  */
 @property (nonatomic,strong) NSMutableDictionary * noteAttributes;
 
+
+/*
+ Keyed on noteID and values are UIImages; 
+ */
+@property (nonatomic,strong) NSMutableDictionary * noteImages;
+
 /*--------------------------------------------------
  
                 Delegatation Properties

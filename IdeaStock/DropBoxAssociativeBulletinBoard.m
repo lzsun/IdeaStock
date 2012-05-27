@@ -291,6 +291,15 @@
     self.needSynchronization = YES;
 }
 
+- (void) addImageNoteContent:(id <Note> )noteItem 
+               andProperties:noteProperties
+                    andImage: (NSData *) img{
+    [super addImageNoteContent:noteItem andProperties:noteProperties andImage:img];
+    
+    self.needSynchronization = YES;
+    
+}
+
 -(void) addNoteAttribute: (NSString *) attributeName
          forAttributeType: (NSString *) attributeType
                   forNote: (NSString *) noteID 

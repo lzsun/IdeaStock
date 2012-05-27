@@ -42,6 +42,10 @@
 - (void) addNoteContent: (id <Note>) note 
           andProperties: (NSDictionary *) properties;
 
+@optional
+- (void) addImageNoteContent:(id <Note> )noteItem 
+               andProperties:noteProperties
+                    andImage: (NSData *) img;
 /*
  Adds an attribute with AttributeName and AttributeType for a particular note specified by note ID. The values specified in the values array will be avalues of this attribute.
  

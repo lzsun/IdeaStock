@@ -163,6 +163,53 @@
     
 }
 
++(NSString *) getImageFileName: (BulletinBoardNote *) note{
+    return [note.noteTextID stringByAppendingString:@".jpg"];
+
+}
+
++(NSData *) convertImageNoteToXooml:(BulletinBoardNote *)note{
+    //create the root element (xooml:fragment) and fill out its attributes
+    DDXMLElement * root = [[DDXMLElement alloc] initWithName: XOOML_FRAGMENT];
+    
+    [root addNamespace: [DDXMLNode namespaceWithName:@"xsi" stringValue: XSI_NAMESPACE]];
+    [root addNamespace: [DDXMLNode namespaceWithName:@"xooml" stringValue: XOOML_NAMESPACE]];
+    [root addAttribute: [DDXMLNode attributeWithName:@"xsi:schemaLocation" stringValue: XOOML_SCHEMA_LOCATION]];
+    [root addAttribute: [DDXMLNode attributeWithName:@"schemaVersion" stringValue: XOOML_SCHEMA_VERSION]];
+    [root addAttribute: [DDXMLNode attributeWithName:@"defaultApplication" stringValue:@""]];
+    [root addAttribute: [DDXMLNode attributeWithName:@"relatedItem" stringValue:@""]];
+    
+    //TODO Add tool specific child of the root here 
+    
+    NSString *imageName = [XoomlParser getImageFileName:note];    //create the association note and its attributes
+    
+    DDXMLElement * xoomlAssociation = [[DDXMLElement alloc] initWithName: XOOML_ASSOCIATION];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:NOTE_ID stringValue:note.noteTextID]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ITEM stringValue:imageName]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ICON stringValue:@""]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_XOOML_FRAGMENT stringValue:@""]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:LEVEL_OF_SYNCHRONIZATION stringValue:@""]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:DISPLAY_TEXT stringValue:note.noteText]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:OPEM_WITH_DEFAULT stringValue:@""]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:CREATED_BY stringValue:APP_NAME]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:CREATED_ON stringValue:note.creationDate]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:MODIFIED_BY stringValue:APP_NAME]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:MODIFIED_ON stringValue:note.modificationDate]];
+    
+    //TODO Add tool specific child of the association here
+    
+    //Add association as a chile of root
+    [root addChild:xoomlAssociation];
+    
+    //create the xml string by appending standard xml headers
+    NSString *xmlString = [root description];
+    NSString *xmlHeader = XML_HEADER;
+    xmlString = [xmlHeader stringByAppendingString:xmlString];
+    
+    return [xmlString dataUsingEncoding:NSUTF8StringEncoding];
+
+}
+
 + (NSData *) getEmptyBulletinBoardXooml{
     //create the root element (xooml:fragment) and fill out its attributes
     DDXMLElement * root = 
