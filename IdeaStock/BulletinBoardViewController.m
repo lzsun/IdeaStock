@@ -349,6 +349,8 @@
     NSLog(@"Read %d image", [allImgs count]);
     self.noteCount = [allNotes count];
     NSLog(@"Read %d notes",[allNotes count]);
+    
+    
     for(NSString* noteID in [allNotes allKeys]){
         BulletinBoardNote * noteObj = [allNotes objectForKey:noteID];
         NSDictionary * noteAttributes = [self.board getAllNoteAttributesForNote:noteID];
@@ -371,7 +373,17 @@
         
         
         CGRect noteFrame = CGRectMake(positionX, positionY, NOTE_WIDTH, NOTE_HEIGHT);
-        NoteView * note = [[NoteView alloc] initWithFrame:noteFrame];
+        NoteView * note ;
+        
+        if ([allImgs objectForKey:noteID]){
+            UIImage * img = [[UIImage alloc] initWithData:[allImgs objectForKey:noteID]];
+            note = [[ImageView alloc] initWithFrame:noteFrame 
+                                                    andImage:img];
+        }
+        else{
+            note = [[NoteView alloc] initWithFrame:noteFrame];
+        }
+
         if (noteObj.noteText) note.text = noteObj.noteText;
         note.transform = CGAffineTransformScale(note.transform, 10, 10);
         note.alpha = 0;
