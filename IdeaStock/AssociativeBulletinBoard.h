@@ -56,7 +56,7 @@
 /*
  Keyed on noteID and values are UIImages; 
  */
-@property (nonatomic,strong) NSMutableDictionary * noteImages;
+@property (nonatomic,strong) NSMutableArray * noteImages;
 
 /*--------------------------------------------------
  

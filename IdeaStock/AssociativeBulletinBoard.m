@@ -415,7 +415,10 @@
     
     [self.noteAttributes setObject:noteAttribute forKey:noteID];
     
-    [self.noteImages setObject:img forKey:noteID];
+    //just save the noteID that has images not the image itself. This is
+    //for performance reasons, anytime that an image is needed we will load
+    //it from the disk
+    [self.noteImages addObject:noteID];
     
     NSData * noteData = [XoomlParser convertImageNoteToXooml:note];
     NSString * imgName = [XoomlParser getImageFileName: note];
