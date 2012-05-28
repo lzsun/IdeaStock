@@ -30,6 +30,8 @@
 @property (strong, nonatomic) UIBarButtonItem * deleteButton;
 @property (strong, nonatomic) UIBarButtonItem * expandButton;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolbar;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property (strong,nonatomic) UIActivityIndicatorView *endActivityIndicator;
 
 /*-----------------------------------------------------------
  Model
@@ -62,6 +64,7 @@
 @synthesize board = _board;
 @synthesize panCounter = _panCounter;
 @synthesize toolbar = _toolbar;
+@synthesize activityIndicator = _activityIndicator;
 @synthesize intersectingViews = _intersectingViews;
 @synthesize deleteButton = _deleteButton;
 @synthesize expandButton = _expandButton;
@@ -69,6 +72,7 @@
 @synthesize highlightedView = _highlightedView;
 @synthesize bulletinBoardName = _bulletinBoardName;
 @synthesize noteCount = _noteCount;
+@synthesize endActivityIndicator = _endActivityIndicator;
 
 -(DropBoxAssociativeBulletinBoard *) board{
     
@@ -82,6 +86,11 @@
     _bulletinBoardName = bulletinBoardName;
     
     
+}
+
+-(void) setActivityIndicator:(UIActivityIndicatorView *)activityIndicator{
+    _activityIndicator = activityIndicator;
+    self.endActivityIndicator = activityIndicator;
 }
 
 /*========================================================================*/
@@ -1059,14 +1068,24 @@
     
     
 }
-
+- (void) close{
+    [self.endActivityIndicator stopAnimating];
+    [self.parent finishedWorkingWithBulletinBoard];
+}
 -(IBAction)backPressed:(id) sender {
     
     //save the bulletinboard
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-    [DropBoxAssociativeBulletinBoard saveBulletinBoard:self.board];
-    [self.parent finishedWorkingWithBulletinBoard];
+    /*[DropBoxAssociativeBulletinBoard saveBulletinBoard:self.board];
+    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    NSLog(@"size: %f",self.activityIndicator.frame.size.width);
+    self.activityIndicator.color = [UIColor blackColor];*/
+    [self.bulletinboardView addSubview:self.endActivityIndicator];
+    [self.endActivityIndicator startAnimating];
+    
+
+    [self performSelector:@selector(close) withObject:nil afterDelay:1];
     
 }
 
@@ -1079,6 +1098,7 @@
     [self setToolbar:nil];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self setActivityIndicator:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
 }
