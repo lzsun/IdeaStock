@@ -11,6 +11,7 @@
 
 #import "XoomlBulletinBoardController.h"
 #import "CallBackDataModel.h"
+#import "FileSystemHelper.h"
 
 
 /*====================================================================*/
@@ -168,6 +169,15 @@
     
     if ( !noteObj) return ;
     
+    if ([noteObj isKindOfClass:[BulletinBoardNote class]]){
+        NSString * imgName = ((BulletinBoardNote *) noteObj).image;
+        if (imgName != nil){
+            NSString * imgPath = [FileSystemHelper getPathForImageWithName:imgName forNoteName:noteName inBulletinBoard:self.bulletinBoardName];
+            if (imgPath != nil && ![imgPath isEqualToString:@""]){
+                [self.noteImages setObject:imgPath forKey:noteID];
+            }
+        }
+    }
     //now set the note object as a noteContent keyed on its id
     [self.noteContents setObject:noteObj forKey:noteID];
     
@@ -417,11 +427,19 @@
     
     //just save the noteID that has images not the image itself. This is
     //for performance reasons, anytime that an image is needed we will load
-    //it from the disk
-    [self.noteImages addObject:noteID];
+    //it from the disk. The dictionary holds noteID and imageFile Path
     
     NSData * noteData = [XoomlParser convertImageNoteToXooml:note];
+
     NSString * imgName = [XoomlParser getImageFileName: note];
+    
+    NSString * imgPath = [FileSystemHelper getPathForImageWithName:imgName forNoteName:noteName inBulletinBoard:self.bulletinBoardName];
+    
+    [self.noteImages setObject:imgPath forKey:noteID];
+    //just save the noteID that has images not the image itself. This is
+    //for performance reasons, anytime that an image is needed we will load
+    //it from the disk. The dictionary holds noteID and imageFileName
+    
     
     [self.dataModel addImageNote: noteName 
                  withNoteContent: noteData 
@@ -680,7 +698,6 @@ fromBulletinBoardAttribute: (NSString *) attributeName
 - (NSDictionary *) getAllNotes{
     return [self.noteContents copy];
 }
-
 - (NSDictionary *) getAllNoteAttributesForNote: (NSString *) noteID{
     
     BulletinBoardAttributes * noteAttributes = [self.noteAttributes objectForKey:noteID];

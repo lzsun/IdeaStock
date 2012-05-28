@@ -330,6 +330,9 @@
 
 -(void) loadSavedNotes: (NSNotification *) notificatoin{
     
+
+    NSLog(@"Reading Bulletinboard data from the filesytem");
+    NSLog(@"----------------------------");
     [self layoutNotes];
 }
 
@@ -342,6 +345,8 @@
         [view removeFromSuperview];
     }
     NSDictionary * allNotes = [self.board getAllNotes];
+    NSDictionary * allImgs = [self.board getAllNoteImages];
+    NSLog(@"Read %d image", [allImgs count]);
     self.noteCount = [allNotes count];
     NSLog(@"Read %d notes",[allNotes count]);
     for(NSString* noteID in [allNotes allKeys]){

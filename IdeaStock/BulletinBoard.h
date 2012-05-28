@@ -46,6 +46,8 @@
 - (void) addImageNoteContent:(id <Note> )noteItem 
                andProperties:noteProperties
                     andImage: (NSData *) img;
+
+@required
 /*
  Adds an attribute with AttributeName and AttributeType for a particular note specified by note ID. The values specified in the values array will be avalues of this attribute.
  
@@ -214,6 +216,10 @@ fromBulletinBoardAttribute: (NSString *) attributeName
  */
 - (NSDictionary *) getAllNotes;
 
+@optional
+-(NSDictionary *) getAllNoteImages;
+
+@required
 /*
  Returns an array of strings containing the name of all the attributes of type attributeType in the bulletin board. 
  */

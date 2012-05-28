@@ -20,7 +20,7 @@
 
 /*--------------------------------------------------
  
-                Private Methods
+ Private Methods
  
  -------------------------------------------------*/
 
@@ -28,7 +28,7 @@
 
 /*--------------------------------------------------
  
-                Synchronization Properties
+ Synchronization Properties
  
  -------------------------------------------------*/
 
@@ -41,7 +41,7 @@
 
 /*--------------------------------------------------
  
-                Dummy Properties
+ Dummy Properties
  
  -------------------------------------------------*/
 
@@ -56,7 +56,7 @@
 
 /*--------------------------------------------------
  
-                    Synthesis
+ Synthesis
  
  -------------------------------------------------*/
 
@@ -87,7 +87,7 @@
 
 /*--------------------------------------------------
  
-                    Synchronization
+ Synchronization
  
  -------------------------------------------------*/
 
@@ -137,7 +137,7 @@
 
 /*--------------------------------------------------
  
-                    Initialization
+ Initialization
  
  -------------------------------------------------*/
 
@@ -207,25 +207,27 @@
                           andName:noteName
                     andProperties:noteInfo];
     }
-    NSLog(@"Note Content Initiated");
     
+    NSLog(@"Note Content Initiated");
+    NSLog(@"-----------------------");
     //initiate Linkages
+    NSLog(@"-----------------------");
     [self initiateLinkages];
     NSLog(@"Linkages initiated");
-    
+    NSLog(@"-----------------------");
     //initiate stacking
     [self initiateStacking];
     NSLog(@"Stacking initiated");
-    
+    NSLog(@"-----------------------");
     //initiate grouping
     [self initiateGrouping];
     NSLog(@"Grouping initiated");
+    NSLog(@"-----------------------");
     
     
     //send notification to the notification objects 
     //so interested objects can see that the bulletinboard is loaded
     
-    NSLog(@"Notification starts");
     [[NSNotificationCenter defaultCenter] postNotificationName:@"BulletinBoardLoaded"
                                                         object:self];
     
@@ -233,7 +235,7 @@
 
 /*--------------------------------------------------
  
-                    Query
+ Query
  
  -------------------------------------------------*/
 
@@ -260,7 +262,7 @@
     NSError * err;
     NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
     if (!data){
-        NSLog(@"Failed to read  file from disk: %@", err);
+        NSLog(@"Failed to read  note file from disk: %@", err);
         return nil;
     }
     
@@ -269,9 +271,22 @@
     return [data dataUsingEncoding:NSUTF8StringEncoding];
 }
 
+-(NSData *) getImageDataForPath: (NSString *) path{
+    NSError * err;
+    NSData * data = [NSData dataWithContentsOfFile:path];
+    if (!data){
+        NSLog(@"Failed to read  fimage ile from disk: %@", err);
+        return nil;
+    }
+    
+    NSLog(@"image: %@ read Successful", [path lastPathComponent]);
+    
+    return data;
+    
+}
 /*--------------------------------------------------
  
-                    Creation
+ Creation
  
  -------------------------------------------------*/
 
@@ -285,7 +300,7 @@
  */
 
 -(void) addNoteContent: (id <Note>) note 
-          andProperties: (NSDictionary *) properties{
+         andProperties: (NSDictionary *) properties{
     [super addNoteContent:note andProperties:properties];
     
     self.needSynchronization = YES;
@@ -301,9 +316,9 @@
 }
 
 -(void) addNoteAttribute: (NSString *) attributeName
-         forAttributeType: (NSString *) attributeType
-                  forNote: (NSString *) noteID 
-                andValues: (NSArray *) values{
+        forAttributeType: (NSString *) attributeType
+                 forNote: (NSString *) noteID 
+               andValues: (NSArray *) values{
     [super addNoteAttribute:attributeName
            forAttributeType:attributeType 
                     forNote:noteID 
@@ -313,9 +328,9 @@
 }
 
 -(void) addNote: (NSString *) targetNoteID
- toAttributeName: (NSString *) attributeName
+toAttributeName: (NSString *) attributeName
 forAttributeType: (NSString *) attributeType
-          ofNote: (NSString *) sourceNoteId{
+         ofNote: (NSString *) sourceNoteId{
     [super addNote:targetNoteID 
    toAttributeName:attributeName 
   forAttributeType:attributeType 
@@ -326,7 +341,7 @@ forAttributeType: (NSString *) attributeType
 
 -(void) addNoteWithID:(NSString *)noteID 
 toBulletinBoardAttribute:(NSString *)attributeName 
-      forAttributeType:(NSString *)attributeType{
+     forAttributeType:(NSString *)attributeType{
     [super addNoteWithID:noteID 
 toBulletinBoardAttribute:attributeName
         forAttributeType:attributeType];
@@ -336,7 +351,7 @@ toBulletinBoardAttribute:attributeName
 
 /*--------------------------------------------------
  
-                    Deletion
+ Deletion
  
  -------------------------------------------------*/
 
@@ -347,9 +362,9 @@ toBulletinBoardAttribute:attributeName
 }
 
 -(void) removeNote: (NSString *) targetNoteID
-      fromAttribute: (NSString *) attributeName
-             ofType: (NSString *) attributeType
-   fromAttributesOf: (NSString *) sourceNoteID{
+     fromAttribute: (NSString *) attributeName
+            ofType: (NSString *) attributeType
+  fromAttributesOf: (NSString *) sourceNoteID{
     [super removeNote:targetNoteID 
         fromAttribute:attributeName 
                ofType:attributeType 
@@ -359,8 +374,8 @@ toBulletinBoardAttribute:attributeName
 }
 
 -(void) removeNoteAttribute: (NSString *) attributeName
-                      ofType: (NSString *) attributeType
-                    FromNote: (NSString *) noteID{
+                     ofType: (NSString *) attributeType
+                   FromNote: (NSString *) noteID{
     [super removeNoteAttribute:attributeName 
                         ofType:attributeType 
                       FromNote:noteID];
@@ -370,7 +385,7 @@ toBulletinBoardAttribute:attributeName
 
 -(void) removeNote: (NSString *) noteID
 fromBulletinBoardAttribute: (NSString *) attributeName 
-             ofType: (NSString *) attributeType{
+            ofType: (NSString *) attributeType{
     [super removeNote:noteID 
 fromBulletinBoardAttribute:attributeName
                ofType:attributeType];
@@ -379,7 +394,7 @@ fromBulletinBoardAttribute:attributeName
 }
 
 -(void) removeBulletinBoardAttribute:(NSString *)attributeName 
-                               ofType:(NSString *)attributeType{
+                              ofType:(NSString *)attributeType{
     [super removeBulletinBoardAttribute:attributeName 
                                  ofType:attributeType];
     self.needSynchronization = YES;
@@ -388,14 +403,14 @@ fromBulletinBoardAttribute:attributeName
 
 /*--------------------------------------------------
  
-                    Update 
+ Update 
  
  -------------------------------------------------*/
 
 -(void) renameNoteAttribute: (NSString *) oldAttributeName 
-                      ofType: (NSString *) attributeType
-                     forNote: (NSString *) noteID 
-                    withName: (NSString *) newAttributeName{
+                     ofType: (NSString *) attributeType
+                    forNote: (NSString *) noteID 
+                   withName: (NSString *) newAttributeName{
     [super renameNoteAttribute:oldAttributeName
                         ofType:attributeType
                        forNote:noteID
@@ -417,8 +432,8 @@ fromBulletinBoardAttribute:attributeName
 }
 
 -(void) renameBulletinBoardAttribute: (NSString *) oldAttributeNAme 
-                               ofType: (NSString *) attributeType 
-                             withName: (NSString *) newAttributeName{
+                              ofType: (NSString *) attributeType 
+                            withName: (NSString *) newAttributeName{
     [super renameBulletinBoardAttribute:oldAttributeNAme
                                  ofType:attributeType 
                                withName:newAttributeName];
@@ -432,9 +447,29 @@ fromBulletinBoardAttribute:attributeName
     
     self.needSynchronization = YES;
 }
+
+
 /*--------------------------------------------------
  
-                    Dropbox delegate methods
+ Query
+ 
+ -------------------------------------------------*/
+
+-(NSDictionary *) getAllNoteImages{
+    NSMutableDictionary * images = [[NSMutableDictionary alloc] init];
+    for (NSString * noteID in self.noteImages){
+        
+        NSString * imgPath = [self.noteImages objectForKey:noteID];
+        NSData * imgData = [self getImageDataForPath:imgPath];
+        if (imgData != nil){
+            [images setObject:imgData forKey:noteID];
+        }
+    }
+    return images;
+}
+/*--------------------------------------------------
+ 
+ Dropbox delegate methods
  
  -------------------------------------------------*/
 
@@ -442,7 +477,7 @@ fromBulletinBoardAttribute:attributeName
     
     NSString * tempDir = [NSTemporaryDirectory() stringByDeletingPathExtension];
     
-     NSString * rootFolder = [tempDir stringByAppendingString:[metadata path]];
+    NSString * rootFolder = [tempDir stringByAppendingString:[metadata path]];
     [FileSystemHelper createMissingDirectoryForPath:rootFolder];
     NSLog(@"Creating root directory: %@",rootFolder);
     //handle this error later
@@ -520,7 +555,7 @@ fromBulletinBoardAttribute:attributeName
 
 /*--------------------------------------------------
  
-                Queue Delegate methods
+ Queue Delegate methods
  
  -------------------------------------------------*/
 
@@ -552,7 +587,7 @@ fromBulletinBoardAttribute:attributeName
 
 /*--------------------------------------------------
  
-                    Dummy Methods
+ Dummy Methods
  
  -------------------------------------------------*/
 

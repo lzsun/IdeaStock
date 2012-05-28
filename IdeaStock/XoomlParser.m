@@ -115,6 +115,10 @@
     note.creationDate = [[noteXML attributeForName: NOTE_CREATION_DATE] stringValue];
     note.modificationDate = [[noteXML attributeForName:NOTE_MODIFICATION_DATE] stringValue];
     
+    NSString * imagePath = [[noteXML attributeForName:ASSOCIATED_ITEM] stringValue];
+    if (imagePath != nil && ![imagePath isEqualToString:@""]){
+        note.image = imagePath;
+    }
     return note;
 
 }

@@ -76,6 +76,16 @@
     
 }
 
-
++(NSString *) getPathForImageWithName: (NSString *) imgName
+                          forNoteName: (NSString *) noteName
+                      inBulletinBoard: (NSString *) bulletinBoardName{
+    
+    NSString * imgPath = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
+    imgPath = [imgPath stringByDeletingLastPathComponent];
+    imgPath = [imgPath stringByAppendingFormat:@"/%@",imgName];
+    
+    return imgPath;
+    
+}
 
 @end

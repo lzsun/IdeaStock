@@ -16,7 +16,7 @@
 @synthesize noteTextID = _noteID;
 @synthesize  creationDate = _creationDate;
 @synthesize modificationDate = _modificationDate;
-
+@synthesize image = _image;
 //Constructor for creating an empty note with the creationDate
 -(BulletinBoardNote *) initWithCreationDate: (NSString *) date{
     self = [[BulletinBoardNote alloc] init];

@@ -27,6 +27,8 @@
 
 @property (nonatomic,strong) NSString * modificationDate;
 
+@property (nonatomic,strong) NSString * image;
+
 - (NSString *) description;
 
 @end

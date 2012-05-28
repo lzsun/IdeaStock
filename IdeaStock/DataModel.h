@@ -135,6 +135,12 @@ If the boardName or noteName are invalid the method returns without doing anythi
  */
 - (NSArray *) getAllBulletinBoardsFromRoot;
 
+
+@optional
+- (NSData *) getImage: (NSString *) imgName
+              ForNote: (NSString *)noteID 
+            andBulletinBoard: (NSString *) bulletinBoardName;
+@required
 /*
  Return a NSData object with the contents of the stored bulletinBoard for
  the bulletinBoardName. 

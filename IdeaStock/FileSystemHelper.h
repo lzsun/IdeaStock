@@ -15,4 +15,8 @@
 + (NSString *) getPathForNoteWithName: (NSString *) noteName inBulletinBoardWithName: (NSString *) bulletinBoardName;        
 
 + (void) createMissingDirectoryForPath: (NSString *) path;
+
++(NSString *) getPathForImageWithName: (NSString *) imgName
+                          forNoteName: (NSString *) noteName
+                      inBulletinBoard: (NSString *) bulletinBoardName;
 @end
