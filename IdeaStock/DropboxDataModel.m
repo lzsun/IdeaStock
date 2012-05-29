@@ -369,11 +369,13 @@
     
     NSString * parentRev = [metadata rev];
     NSString * path = [metadata path];
-    NSLog(@"Got Rev: %@", parentRev);
-    NSLog(@"For path: %@" , path);
                                      
     
+    NSLog(@"Meta data loaded");
     if( [self.action isEqualToString:UPDATE_BULLETIN_BOARD_ACTION] ){
+        
+        NSLog(@"Performing Update Bulletin board action");
+        
         NSString * sourcePath = self.actionPath;
         
         self.action = nil;
@@ -383,12 +385,15 @@
         self.restClient.delegate = self.tempDel;
         
         path = [path stringByDeletingLastPathComponent];
+        
+        NSLog(@"Uploading file: %@ to destination: %@", sourcePath, path);
         [self.restClient uploadFile:BULLETINBOARD_XOOML_FILE_NAME toPath:path withParentRev:parentRev fromPath:sourcePath];
         return;
     }
     
     if ( [self.action isEqualToString:UPDATE_NOTE_ACTION]){
         
+        NSLog(@"Performin Update Note Action");
         NSString * sourcePath = self.actionPath;        
      
         self.action = nil;
@@ -398,6 +403,7 @@
 
         
         path = [path stringByDeletingLastPathComponent];
+        NSLog(@"Uploading file: %@ to destination : %@", sourcePath,path);
         [self.restClient uploadFile:NOTE_XOOML_FILE_NAME toPath:path withParentRev:parentRev fromPath:sourcePath];
         return;
     }
@@ -422,6 +428,8 @@ loadMetadataFailedWithError:(NSError *)error {
 -(void)restClient:(DBRestClient*)client createdFolder:(DBMetadata*)folder{
     
     if ([self.action isEqualToString:ADD_BULLETIN_BOARD_ACTION]){
+        
+        NSLog(@"Performing Add Bulletin board action");
         NSLog(@"Folder Created for bulletinboard: %@ ", self.actionBulletinBoardName);
         NSString *path = [folder path];
         NSString * sourcePath = self.actionPath;
@@ -444,6 +452,7 @@ loadMetadataFailedWithError:(NSError *)error {
     //I will need to implement something like the queue mechanism for update note. 
     if([self.action isEqualToString:ADD_NOTE_ACTION] ||
        [self.action isEqualToString:ADD_IMAGE_NOTE_ACTION]){
+        NSLog(@"Performing Add Note action");
         NSLog(@"Folder Created for note: %@", self.actionNoteName);
         NSString * path = [folder path];
         
@@ -465,9 +474,10 @@ loadMetadataFailedWithError:(NSError *)error {
         
         if (isImage){
             
-            
+            NSLog(@"Note is an Image");
             NSString *imgPath = [sourcePath stringByDeletingLastPathComponent];
             imgPath = [imgPath stringByAppendingFormat:@"/%@",self.actionFileName];
+            NSLog(@"Uploading image file: from %@ to destination: %@", imgPath, path);
             [self.restClient uploadFile:self.actionFileName toPath:path withParentRev:nil fromPath:imgPath];
             self.actionFileName = nil;
         }

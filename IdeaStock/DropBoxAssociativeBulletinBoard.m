@@ -117,6 +117,8 @@
     
     if (self.needSynchronization){
         self.needSynchronization = NO;
+        NSLog(@"==================");
+        NSLog(@"Synchronizing");
         [DropBoxAssociativeBulletinBoard saveBulletinBoard: self];
     }
 }
@@ -480,7 +482,6 @@ fromBulletinBoardAttribute:attributeName
     NSString * directory = [[metadata path] lowercaseString];
     NSString * rootFolder = [tempDir stringByAppendingString:directory];
     [FileSystemHelper createMissingDirectoryForPath:rootFolder];
-    NSLog(@"Creating root directory: %@",rootFolder);
     //handle this error later
     NSError * err;
     NSFileManager * fileManager =  [NSFileManager defaultManager];
@@ -500,11 +501,10 @@ fromBulletinBoardAttribute:attributeName
         
         
         else{
-            NSLog(@"found file: %@", child.path);
+            NSLog(@"Found file: %@", child.path);
             
             self.fileCounter++;
             
-            NSLog(@"path:  %@", child.path);
             NSString * destination = [tempDir stringByAppendingString:path];
             
             NSLog(@"putting file in destination: %@",destination);

@@ -37,7 +37,6 @@
             }
             else if ([view isKindOfClass:[UIImageView class]]){
                 UIImageView * newImage = [[UIImageView alloc] initWithImage:image];
-                NSLog(@"%f",view.frame.size.width);
                 newImage.frame = CGRectMake(view.frame.origin.x + view.frame.size.width * IMG_OFFSET_X_RATE,
                                             view.frame.origin.y + view.frame.size.height * IMG_OFFSET_Y_RATE,
                                             view.frame.size.width * IMG_SIZE_WIDTH_RATIO,

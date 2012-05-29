@@ -425,7 +425,6 @@
         NSMutableArray * views = [[NSMutableArray alloc] init];
         NSArray * noteRefIDs = [stackings objectForKey:stackingID];
         NSSet * noteRefs = [[NSSet alloc] initWithArray:noteRefIDs];
-        NSLog(@"%@",noteRefIDs);
         UIView * mainView;
         for (UIView * view in self.bulletinboardView.subviews){
             if ([view isKindOfClass:[NoteView class]]){

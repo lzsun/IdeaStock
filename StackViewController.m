@@ -341,7 +341,7 @@
                                         repeats:NO];
         
         CGPoint offset = CGPointMake(self.stackView.frame.size.width + self.stackView.contentOffset.x, self.stackView.contentOffset.y);
-        NSLog(@"content size after offset : %f", self.stackView.contentSize.width);
+      //  NSLog(@"content size after offset : %f", self.stackView.contentSize.width);
         [self.stackView setContentOffset:offset animated:YES];
         return YES;
     }
@@ -352,7 +352,6 @@
              middleCornerPage >= 0 &&
              !self.isLocked){
         
-        NSLog(@"HERE");
         self.isLocked = true;
         [NSTimer scheduledTimerWithTimeInterval: FLIP_PERIOD 
                                          target:self 
@@ -361,7 +360,7 @@
                                         repeats:NO];
         CGPoint offset = CGPointMake(self.stackView.contentOffset.x- self.stackView.frame.size.width, self.stackView.contentOffset.y);
         [self.stackView setContentOffset:offset animated:YES];
-        NSLog(@"content size after offset : %f", self.stackView.contentSize.width);
+    //    NSLog(@"content size after offset : %f", self.stackView.contentSize.width);
         return YES;
         
     }
