@@ -275,7 +275,7 @@
     NSError * err;
     NSData * data = [NSData dataWithContentsOfFile:path];
     if (!data){
-        NSLog(@"Failed to read  fimage ile from disk: %@", err);
+        NSLog(@"Failed to read  image %@ ile from disk: %@", path,err);
         return nil;
     }
     
@@ -477,7 +477,8 @@ fromBulletinBoardAttribute:attributeName
     
     NSString * tempDir = [NSTemporaryDirectory() stringByDeletingPathExtension];
     
-    NSString * rootFolder = [tempDir stringByAppendingString:[metadata path]];
+    NSString * directory = [[metadata path] lowercaseString];
+    NSString * rootFolder = [tempDir stringByAppendingString:directory];
     [FileSystemHelper createMissingDirectoryForPath:rootFolder];
     NSLog(@"Creating root directory: %@",rootFolder);
     //handle this error later

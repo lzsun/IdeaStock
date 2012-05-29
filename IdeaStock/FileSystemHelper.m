@@ -82,6 +82,7 @@
     
     NSString * imgPath = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
     imgPath = [imgPath stringByDeletingLastPathComponent];
+    imgName = [imgName lowercaseString];
     imgPath = [imgPath stringByAppendingFormat:@"/%@",imgName];
     
     return imgPath;

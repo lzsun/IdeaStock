@@ -543,7 +543,7 @@
                     
                     //check to see if traveling this distance makes the subView fall out of screen on the left side
                     if ( subView.frame.origin.x - distanceToExitX > self.bulletinboardView.bounds.origin.x){
-                        //the view doesn't fall out of the screen so move make its starting point there
+                        //the view doesn't fall out of the screen so move make its starting point there 
                         newStartX = subView.frame.origin.x - distanceToExitX;
                     }
                     else{
