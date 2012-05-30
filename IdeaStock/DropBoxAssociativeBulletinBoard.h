@@ -17,7 +17,7 @@
  with the extra functionality that it can also be used as a delegate for 
  responsing to the dropbox asynch calls
  */
-@interface DropBoxAssociativeBulletinBoard : AssociativeBulletinBoard <DBRestClientDelegate,QueueProducer,DropboxActionController>
+@interface DropBoxAssociativeBulletinBoard : AssociativeBulletinBoard <DropboxActionController>
 
 -(id) initBulletinBoardFromXoomlWithName:(NSString *)bulletinBoardName;
 
@@ -30,6 +30,7 @@
 
 -(void) stopTimer;
 
+-(void) cleanUp;
 
 -(void) demoAddNewBulletinBoard;
 

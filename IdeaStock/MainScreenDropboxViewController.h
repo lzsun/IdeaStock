@@ -11,7 +11,7 @@
 #import "QueueProducer.h"
 #import "DropboxActionController.h"
 
-@interface MainScreenDropboxViewController : UIViewController <DBRestClientDelegate,QueueProducer,DropboxActionController>
+@interface MainScreenDropboxViewController : UIViewController <DropboxActionController>
 
 //Maybe at some point I should make the dropbox datamodel follow 
 //the singleton pattern but as for now I imagine there is one instance of 

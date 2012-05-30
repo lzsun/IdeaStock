@@ -58,7 +58,6 @@
 @synthesize bulletinBoardNames = _bulletinBoardNames;
 @synthesize prototypeView = _prototypeView;
 @synthesize mainView = _mainView;
-@synthesize queue = _queue;
 @synthesize colorOrder = _colorOrder;
 @synthesize lastView = _lastView;
 @synthesize lastFrame = _lastFrame;
@@ -427,6 +426,15 @@
     [self layoutBulletinBoards:YES withDuration:0.2];
 }
 
+
+/*------------------------------------------------
+                    Notifications
+ -------------------------------------------------*/
+
+-(void) bulletinBoardsRead: (NSNotification *) notification{
+    self.bulletinBoardNames = (NSMutableArray*) notification.object;
+    [self layoutBulletinBoards];
+}
 /*------------------------------------------------
  UI Event helpers
  -------------------------------------------------*/
@@ -513,18 +521,15 @@
 
 -(void) viewDidLoad{
     
-    /*   UIImage * img = [UIImage imageNamed:@"skybacground.jpg"];
-     UIImageView * imgView =[[UIImageView alloc] initWithFrame:self.mainView.frame];
-     imgView.image = img;
-     UIView * superView =  self.mainView.superview;
-     [self.mainView removeFromSuperview];
-     // [self.mainView addSubview:imgView];
-     //[imgView addSubview:self.mainView];
-     [superView addSubview:imgView];
-     [superView addSubview:self.mainView];*/
-    [self.mainView setBackgroundColor: [UIColor clearColor]];
+
     
     [super viewDidLoad];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(bulletinBoardsRead:)
+                                                 name:@"BulletinboardsLoaded" 
+                                               object:self.dropBox];
+    [self.mainView setBackgroundColor: [UIColor clearColor]];
     
     if (![[DBSession sharedSession] isLinked]) {
         [[DBSession sharedSession] link];
@@ -546,6 +551,7 @@
 
 -(void) viewDidUnload{
     
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self setMainView:nil];
     [self setPrototypeView:nil];
     [super viewDidUnload];
@@ -562,44 +568,7 @@
     return YES;
 }
 
-/*------------------------------------------------
- Dropbox Delegate Protocol
- -------------------------------------------------*/
 
--(void) restClient:(DBRestClient *)client loadedMetadata:(DBMetadata *)metadata{
-    
-    for (DBMetadata * child in metadata.contents){
-        if (child.isDirectory){
-            NSString * name = [child.path substringFromIndex:1];
-            [self.bulletinBoardNames addObject:name];
-        }
-    }
-    
-    NSLog(@"These bulletin boards got loaded \n: %@", self.bulletinBoardNames);
-    
-    [self layoutBulletinBoards];
-    
-}
-
-- (void)restClient:(DBRestClient*)client uploadedFile:(NSString*)destPath from:(NSString*)srcPath 
-          metadata:(DBMetadata*)metadata{
-    NSString * destPathOrg = [destPath stringByDeletingLastPathComponent];
-    
-    if ([self.dropBox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE]){
-        if ([[self.dropBox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] objectForKey:destPathOrg]){
-            NSLog(@"Successfully Uploaded File from %@ to %@", srcPath,destPath);
-            [[self.dropBox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] removeObjectForKey:destPathOrg];
-            NSLog(@"%@",self.dropBox.actions);
-            self.actionInProgress = NO;
-        }
-    }
-    
-    
-}
--(void) restClient:(DBRestClient*)client loadMetadataFailedWithError:(NSError*)error{
-    
-    NSLog(@"Failutre: %@",error);
-}
 
 /*------------------------------------------------
  Bulletinboard Delegate Protocol
@@ -611,21 +580,6 @@
 }
 
 
-/*------------------------------------------------
- Queue Delegate Protocol
- -------------------------------------------------*/
-
-/*
- The queue methods are here for the purpose of multi delete
- */
--(void) putIntoQueue: (id) item{
-    
-    [self.queue addObject:item];    
-}
-
--(void) produceNext{
-    //pick up the next delete request and send the request to dropbox
-}
 
 
 @end

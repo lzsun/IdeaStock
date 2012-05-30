@@ -1091,11 +1091,13 @@
 -(void) viewDidUnload
 {
     //[DropBoxAssociativeBulletinBoard saveBulletinBoard:self.board];
+    
+    [self.board cleanUp];
+    
     [self setLabel:nil];
     [self setView:nil];
     [self setBulletinboardView:nil];
     [self setToolbar:nil];
-    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self setActivityIndicator:nil];
     [super viewDidUnload];

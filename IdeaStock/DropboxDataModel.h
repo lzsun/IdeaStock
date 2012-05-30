@@ -11,6 +11,7 @@
 #import <DropboxSDK/DropboxSDK.h>
 #import "CallBackDataModel.h"
 #import "DropboxActionController.h"
+#import "QueueProducer.h"
 
 @interface DropboxDataModel : NSObject <DataModel,CallBackDataModel,DBRestClientDelegate> 
 

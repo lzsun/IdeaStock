@@ -73,7 +73,6 @@
 //TODO here I am patrially initializing the class. I think this is bad
 @synthesize dataModel = _dataModel;
 @synthesize fileCounter = _fileCounter;
-@synthesize queue = _queue;
 @synthesize  needSynchronization =
 _needSynchronization;
 @synthesize  timer = _timer;
@@ -81,12 +80,7 @@ _needSynchronization;
 @synthesize demoBulletinBoardName = _demoBulletinBoardName;
 @synthesize actionInProgress = _actionInProgress;
 
-- (NSMutableArray *) queue{
-    if (!_queue){
-        _queue = [NSMutableArray array];
-    }
-    return _queue;
-}
+
 
 - (DropboxDataModel *) dataModel{
     if (!_dataModel){
@@ -146,19 +140,6 @@ _needSynchronization;
 }
 
 
-+(void) saveBulletinBoard:(id) bulletinBoard{
-    
-    if ([bulletinBoard isKindOfClass:[DropBoxAssociativeBulletinBoard class]]){
-        DropBoxAssociativeBulletinBoard * board = (DropBoxAssociativeBulletinBoard *) bulletinBoard;
-        if ([board.dataModel isKindOfClass:[DropboxDataModel class]]){
-            ((DropboxDataModel *) board.dataModel).delegate = board;
-        }
-        
-    }
-    
-    [super saveBulletinBoard:bulletinBoard];
-}
-
 /*--------------------------------------------------
  
  Initialization
@@ -174,6 +155,10 @@ _needSynchronization;
     self = [super initEmptyBulletinBoardWithDataModel:dataModel
                                               andName:bulletinBoardName];
     [self startTimer];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(bulletinboardDownloaded:)
+                                                 name:@"bulletinboardsDownloaded" 
+                                               object:self.dataModel];
     return self;
     
 }
@@ -184,20 +169,27 @@ _needSynchronization;
     if ( [dataModel isKindOfClass:[DropboxDataModel class]]){
         ((DropboxDataModel *) dataModel).actionController = self;
     }
+    
+    
     return [self initBulletinBoardFromXoomlWithName:bulletinBoardName];
 }
 
 -(id) initBulletinBoardFromXoomlWithName:(NSString *)bulletinBoardName{
     
     
+
+    
     self = [super initBulletinBoardFromXoomlWithDatamodel:self.dataModel andName:bulletinBoardName];
     
-    [(id <CallBackDataModel>) self.dataModel setDelegate:self];
     if ( [self.dataModel isKindOfClass:[DropboxDataModel class]]){
         ((DropboxDataModel *) self.dataModel).actionController = self;
     }
     //count the number of file to know when the download is finished
     self.fileCounter = 0;
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(bulletinboardDownloaded:)
+                                                 name:@"bulletinboardsDownloaded" 
+                                               object:self.dataModel];
     [(DropboxDataModel <CallBackDataModel> *) self.dataModel getBulletinBoardAsynch:bulletinBoardName];
     
     //start synchronization timer
@@ -266,6 +258,18 @@ _needSynchronization;
     
 }
 
+
+
+/*--------------------------------------------------
+ 
+Notification
+ 
+ -------------------------------------------------*/
+
+-(void)bulletinboardDownloaded: (NSNotification *) notification{
+    
+    [self initiateBulletinBoad];
+}
 /*--------------------------------------------------
  
  Query
@@ -509,140 +513,17 @@ fromBulletinBoardAttribute:attributeName
     }
     return images;
 }
-/*--------------------------------------------------
+
+
+
+/*-------------------------------------------
  
- Dropbox delegate methods
- 
- -------------------------------------------------*/
+ Clean up
+ -------------------------------------------*/
 
-- (void)restClient:(DBRestClient*)client loadedMetadata:(DBMetadata*)metadata{
-    
-    NSString * tempDir = [NSTemporaryDirectory() stringByDeletingPathExtension];
-    
-    NSString * directory = [[metadata path] lowercaseString];
-    NSString * rootFolder = [tempDir stringByAppendingString:directory];
-    [FileSystemHelper createMissingDirectoryForPath:rootFolder];
-    //handle this error later
-    NSError * err;
-    NSFileManager * fileManager =  [NSFileManager defaultManager];
-    
-    for(DBMetadata * child in metadata.contents){
-        NSString *path = [child.path lowercaseString];
-        if(child.isDirectory){
-            [client loadMetadata:child.path];
-            NSString * dir = [tempDir stringByAppendingString:path];
-            NSLog(@"Creating the dir: %@", dir);
-            BOOL didCreate = [fileManager createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:&err];
-            if (!didCreate){
-                NSLog(@"Error in creating Dir: %@",err);
-            }
-            
-        }
-        
-        
-        else{
-            NSLog(@"Found file: %@", child.path);
-            
-            self.fileCounter++;
-            
-            NSString * destination = [tempDir stringByAppendingString:path];
-            
-            NSLog(@"putting file in destination: %@",destination);
-            [client loadFile:child.path intoPath:destination];
-        }
-    }
+-(void) cleanUp{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
-
-- (void)restClient:(DBRestClient*)client loadMetadataFailedWithError:(NSError*)error{
-    NSLog(@"Failutre: %@",error);
-}
--(void) restClient: (DBRestClient *) client loadedFile:(NSString *)destPath{
-    //one file is loaded so reduce the counter
-    self.fileCounter --;
-    
-    if (self.fileCounter == 0){
-        //all the bulletinboard files are downloaded
-        //now initialize the bulletinBoard. 
-        NSLog(@"All Files Download");
-        
-        [self initiateBulletinBoad];
-    }
-    
-}
-
-- (void)restClient:(DBRestClient*)client loadFileFailedWithError:(NSError*)error {
-    NSLog(@"There was an error loading the file - %@", error);
-}
-
-- (void)restClient:(DBRestClient*)client uploadedFile:(NSString*)destPath from:(NSString*)srcPath 
-          metadata:(DBMetadata*)metadata{
-    
-    NSString * destPathOrg = [destPath stringByDeletingLastPathComponent];
-    if ([self.dataModel isKindOfClass:[DropboxDataModel class]]){
-        DropboxDataModel * dropbox = (DropboxDataModel *) self.dataModel;
-        if ([dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE]){
-            if ([[dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] objectForKey:destPathOrg]){
-                NSLog(@"Available Actions: %@",dropbox.actions);
-                NSLog(@"Successfully Uploaded File from %@ to %@", srcPath,destPath);
-                [[dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] removeObjectForKey:destPathOrg];
-                NSLog(@"Remaining Actions: %@",dropbox.actions);
-                self.actionInProgress = NO;
-            }
-        }
-    }
-    
-}
-
-- (void)restClient:(DBRestClient*)client uploadFileFailedWithError:(NSError*)error{
-    NSLog(@"Upload file failed with error: %@", error);
-}
-
-
-- (void)restClient:(DBRestClient*)client deletedPath:(NSString *)path{
-    NSLog(@"Successfully deleted path : %@", path);
-    self.actionInProgress = NO;
-    
-}
-- (void)restClient:(DBRestClient*)client deletePathFailedWithError:(NSError*)error{
-    NSLog(@"Failed to delete path: %@", error);
-}
-
-/*--------------------------------------------------
- 
- Queue Delegate methods
- 
- -------------------------------------------------*/
-
--(void) putIntoQueue: (id) item{
-    NSLog(@"putting an update action into Queue");
-    [self.queue addObject:item];    
-}
-
-/*
- This method is called whenever the asynch data model finishes processing 
- and adding a new note. The datamodel will call this method and picks up another
- remianing note to be added.
- */
-#define NOTE_NAME_TYPE @"name"
--(void) produceNext{
-    //we are done
-    if ([self.queue count] == 0){
-        self.actionInProgress = NO;
-        return;
-    }
-    
-    NSString * noteID = [self.queue lastObject];
-    [self.queue removeLastObject];
-    NSData * noteData = [XoomlParser convertNoteToXooml:[self.noteContents objectForKey:noteID]];
-    BulletinBoardAttributes * noteAttributes = [self.noteAttributes objectForKey:noteID];
-    NSString * noteName = [[noteAttributes getAttributeWithName:NOTE_NAME forAttributeType:NOTE_NAME_TYPE] lastObject];
-    NSLog(@"Picking another update action from Queue");
-    [self.dataModel updateNote:noteName withContent:noteData inBulletinBoard:self.bulletinBoardName];
-    
-    
-    
-}
-
 /*--------------------------------------------------
  
  Dummy Methods
