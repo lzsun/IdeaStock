@@ -158,7 +158,7 @@ _needSynchronization;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(bulletinboardDownloaded:)
                                                  name:@"bulletinboardsDownloaded" 
-                                               object:self.dataModel];
+                                               object:nil];
     return self;
     
 }
@@ -189,7 +189,7 @@ _needSynchronization;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(bulletinboardDownloaded:)
                                                  name:@"bulletinboardsDownloaded" 
-                                               object:self.dataModel];
+                                               object:nil];
     [(DropboxDataModel <CallBackDataModel> *) self.dataModel getBulletinBoardAsynch:bulletinBoardName];
     
     //start synchronization timer
@@ -363,7 +363,8 @@ Notification
            forAttributeType:attributeType 
                     forNote:noteID 
                   andValues:values];
-    self.actionInProgress = YES;
+    
+    
     self.needSynchronization = YES;
 }
 
@@ -375,7 +376,7 @@ forAttributeType: (NSString *) attributeType
    toAttributeName:attributeName 
   forAttributeType:attributeType 
             ofNote:sourceNoteId];
-    self.actionInProgress = YES;
+    
     self.needSynchronization = YES;
 }
 
@@ -386,7 +387,7 @@ toBulletinBoardAttribute:(NSString *)attributeName
 toBulletinBoardAttribute:attributeName
         forAttributeType:attributeType];
     
-    self.actionInProgress = YES;
+
     self.needSynchronization = YES;
 }
 
@@ -412,7 +413,7 @@ toBulletinBoardAttribute:attributeName
                ofType:attributeType 
      fromAttributesOf:sourceNoteID];
     
-    self.actionInProgress = YES;
+
     self.needSynchronization = YES;
 }
 
@@ -423,7 +424,7 @@ toBulletinBoardAttribute:attributeName
                         ofType:attributeType 
                       FromNote:noteID];
     
-    self.actionInProgress = YES;
+
     self.needSynchronization = YES;
 }
 
@@ -434,7 +435,7 @@ fromBulletinBoardAttribute: (NSString *) attributeName
 fromBulletinBoardAttribute:attributeName
                ofType:attributeType];
     
-    self.actionInProgress = YES;
+
     self.needSynchronization = YES;
 }
 
@@ -442,7 +443,7 @@ fromBulletinBoardAttribute:attributeName
                               ofType:(NSString *)attributeType{
     [super removeBulletinBoardAttribute:attributeName 
                                  ofType:attributeType];
-    self.actionInProgress = YES;
+
     self.needSynchronization = YES;
 }
 
@@ -461,7 +462,7 @@ fromBulletinBoardAttribute:attributeName
                         ofType:attributeType
                        forNote:noteID
                       withName:newAttributeName];
-        self.actionInProgress = YES;
+
     self.needSynchronization = YES;
 }
 
@@ -473,7 +474,8 @@ fromBulletinBoardAttribute:attributeName
                         ofType:attributeType
                        forNote:noteID 
                  withNewValues:newValues];
-        self.actionInProgress = YES;
+
+    
     self.needSynchronization = YES;
 }
 
@@ -483,14 +485,14 @@ fromBulletinBoardAttribute:attributeName
     [super renameBulletinBoardAttribute:oldAttributeNAme
                                  ofType:attributeType 
                                withName:newAttributeName];
-        self.actionInProgress = YES;
+
     self.needSynchronization = YES;
 }
 
 
 -(void) updateNoteProperties:(NSString *)noteID withProperties:(NSDictionary *)newProperties{
     [super updateNoteProperties:noteID withProperties:newProperties];
-        self.actionInProgress = YES;
+
     self.needSynchronization = YES;
 }
 

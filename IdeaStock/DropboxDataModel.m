@@ -119,9 +119,6 @@
     }
     
     
-    //make yourself delegate
-    self.restClient.delegate = self;
-    
     
     //set the action
     
@@ -134,7 +131,7 @@
     action.actionPath = path;
     action.actionBulletinBoardName = bulletinBoardName;
     
-    NSString * folderName = bulletinBoardName;
+    NSString * folderName = [@"/" stringByAppendingString: bulletinBoardName];
     [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] setObject:action forKey:folderName];
     
     //now create a folder in dropbox the rest is done by the foldercreated delegate method
@@ -173,7 +170,7 @@ ToBulletinBoard: (NSString *) bulletinBoardName{
     action.actionBulletinBoardName = bulletinBoardName;
     action.actionNoteName = noteName;
     
-    NSString * folderName = [destination lastPathComponent];
+    NSString * folderName = destination;
     [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] setObject:action forKey:folderName];
     
     //the rest is done for loadedMetadata method
@@ -190,7 +187,7 @@ ToBulletinBoard: (NSString *) bulletinBoardName{
     
     
     NSError * err;
-    NSString * path = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
+    NSString * notePath = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
     
     if (![self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER]){
         [self.actions setObject:[[NSMutableDictionary alloc] init] forKey:ACTION_TYPE_CREATE_FOLDER];
@@ -198,15 +195,15 @@ ToBulletinBoard: (NSString *) bulletinBoardName{
     
     
     
-    [FileSystemHelper createMissingDirectoryForPath:path];
-    BOOL didWrite = [note writeToFile:path options:NSDataWritingAtomic error:&err];
+    [FileSystemHelper createMissingDirectoryForPath:notePath];
+    BOOL didWrite = [note writeToFile:notePath options:NSDataWritingAtomic error:&err];
     
     if (!didWrite){
         NSLog(@"Error in writing to file system: %@", err);
         return;
     }
     
-    path = [path stringByDeletingLastPathComponent];
+    NSString *path = [notePath stringByDeletingLastPathComponent];
     path = [path stringByAppendingFormat:@"/%@",imgName];
     
     didWrite = [img writeToFile:path options:NSDataWritingAtomic error:&err];
@@ -218,7 +215,7 @@ ToBulletinBoard: (NSString *) bulletinBoardName{
     
     
     DropboxAction * action = [[DropboxAction alloc] init];
-    action.actionPath = path;
+    action.actionPath = notePath;
     action.action = ADD_IMAGE_NOTE_ACTION;
     action.actionBulletinBoardName = bulletinBoardName;
     action.actionNoteName = noteName;
@@ -393,7 +390,7 @@ ToBulletinBoard: (NSString *) bulletinBoardName{
     }
     
     DropboxAction * action = [[DropboxAction alloc] init];
-    action.action = GET_ALL_BULLETINBOARDS_ACTION;
+    action.action = GET_BULLETINBOARD_ACTION;
     
     NSString * folder =[NSString stringWithFormat: @"/%@", bulletinBoardName];
     [[self.actions objectForKey:ACTION_TYPE_GET_METADATA] setObject:action forKey:folder];
@@ -414,11 +411,18 @@ ToBulletinBoard: (NSString *) bulletinBoardName{
     
     DropboxAction * actionItem;
     if ([self.actions objectForKey:ACTION_TYPE_GET_METADATA]){
-        NSString * folderName = [path lastPathComponent];
-        if ([[self.actions objectForKey:ACTION_TYPE_GET_METADATA] objectForKey:folderName]){
-            actionItem = [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] objectForKey:folderName];
+        NSString * folderName = path;
+        //NSString * folderName = [path lastPathComponent];
+
+        if ([[self.actions objectForKey:ACTION_TYPE_GET_METADATA] objectForKey:folderName] || 
+            [[self.actions objectForKey:ACTION_TYPE_GET_METADATA] objectForKey:[@"/" stringByAppendingString:folderName]]){
             
-            [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] removeObjectForKey:folderName];
+            actionItem = [[self.actions objectForKey:ACTION_TYPE_GET_METADATA] objectForKey:folderName];
+            if (actionItem == nil){
+                actionItem = actionItem = [[self.actions objectForKey:ACTION_TYPE_GET_METADATA] objectForKey:[@"/" stringByAppendingString:folderName]];
+            }
+            
+            [[self.actions objectForKey:ACTION_TYPE_GET_METADATA] removeObjectForKey:folderName];
         }
     }
     
@@ -531,10 +535,13 @@ ToBulletinBoard: (NSString *) bulletinBoardName{
                 DropboxAction * action = [[DropboxAction alloc] init];
                 action.action = GET_BULLETINBOARD_ACTION;
                 if (![self.actions objectForKey:ACTION_TYPE_LOAD_FILE]){
-                    [self.actions setObject:[[NSDictionary alloc] init] forKey:ACTION_TYPE_LOAD_FILE];
+                    [self.actions setObject:[[NSMutableDictionary alloc] init] forKey:ACTION_TYPE_LOAD_FILE];
                 }
                 
                 NSString * folder = destination;
+                if (![self.actions objectForKey:ACTION_TYPE_LOAD_FILE]){
+                    [self.actions setObject:[[NSMutableDictionary alloc] init] forKey:ACTION_TYPE_LOAD_FILE];
+                }
                 [[self.actions objectForKey:ACTION_TYPE_LOAD_FILE] setObject:action forKey:folder];
                 [client loadFile:child.path intoPath:folder];
             }
@@ -570,7 +577,8 @@ loadMetadataFailedWithError:(NSError *)error {
     
     if ([self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER]){
         
-        NSString * folderName = [[folder path] lastPathComponent];
+        NSString *folderName = [folder path];
+//        NSString * folderName = [[folder path] lastPathComponent];
         if ([[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] objectForKey:folderName]){
             actionItem = [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] objectForKey:folderName];
             [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] removeObjectForKey:folderName];
@@ -660,11 +668,13 @@ loadMetadataFailedWithError:(NSError *)error {
     
     if ([self.actions objectForKey:ACTION_TYPE_LOAD_FILE]){
         
-        NSString * folderName = [destPath lastPathComponent];
+        NSString * folderName = destPath;
+        //NSString * folderName = [destPath lastPathComponent];
         if ([[self.actions objectForKey:ACTION_TYPE_LOAD_FILE] objectForKey:folderName]){
             actionItem = [[self.actions objectForKey:ACTION_TYPE_LOAD_FILE] objectForKey:folderName];
             [[self.actions objectForKey:ACTION_TYPE_LOAD_FILE] removeObjectForKey:folderName];
         }
+        [[self.actions objectForKey:ACTION_TYPE_LOAD_FILE] removeObjectForKey:folderName];
     }
     
     if ([actionItem.action isEqualToString:GET_BULLETINBOARD_ACTION]){

@@ -141,7 +141,7 @@
     //create the association note and its attributes
     DDXMLElement * xoomlAssociation = [[DDXMLElement alloc] initWithName: XOOML_ASSOCIATION];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:NOTE_ID stringValue:note.noteTextID]];
-    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ITEM stringValue:@""]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ITEM stringValue:note.image]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ICON stringValue:@""]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_XOOML_FRAGMENT stringValue:@""]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:LEVEL_OF_SYNCHRONIZATION stringValue:@""]];

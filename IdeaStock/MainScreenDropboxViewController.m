@@ -432,6 +432,7 @@
  -------------------------------------------------*/
 
 -(void) bulletinBoardsRead: (NSNotification *) notification{
+    
     self.bulletinBoardNames = (NSMutableArray*) notification.object;
     [self layoutBulletinBoards];
 }
@@ -493,7 +494,6 @@
     [alert show];
 }
 - (IBAction)refreshPressed:(id)sender {
-    [self.dropBox setDelegate: self];
     for (UIView * board in self.mainView.subviews) {
         [board removeFromSuperview];
     }
@@ -528,7 +528,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(bulletinBoardsRead:)
                                                  name:@"BulletinboardsLoaded" 
-                                               object:self.dropBox];
+                                               object:nil];
     [self.mainView setBackgroundColor: [UIColor clearColor]];
     
     if (![[DBSession sharedSession] isLinked]) {
@@ -542,7 +542,6 @@
     //in the callback here. 
     //TODO make delegate a property so you can access it by dropbox.delegate
     
-    [self.dropBox setDelegate: self];
     [self.dropBox setActionController:self];
     [self.dropBox getAllBulletinBoardsAsynch];
     
