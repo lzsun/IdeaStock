@@ -25,6 +25,7 @@
 		D71EA17F154BA19600496663 /* pile boardBig.png in Resources */ = {isa = PBXBuildFile; fileRef = D71EA17D154BA19600496663 /* pile boardBig.png */; };
 		D71EA185154CD3FB00496663 /* BulletinBoardViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D71EA184154CD3FB00496663 /* BulletinBoardViewController.m */; };
 		D731B4C11535F17B0015C325 /* MockDropBoxDatamodel.m in Sources */ = {isa = PBXBuildFile; fileRef = D731B4C01535F17B0015C325 /* MockDropBoxDatamodel.m */; };
+		D7440ECC157541A500C53F4A /* DropboxAction.m in Sources */ = {isa = PBXBuildFile; fileRef = D7440ECB157541A500C53F4A /* DropboxAction.m */; };
 		D74CF0C415266DD900DDEF0F /* BulletinboardXoomlTemplate.xml in Resources */ = {isa = PBXBuildFile; fileRef = D74CF0C315266DD900DDEF0F /* BulletinboardXoomlTemplate.xml */; };
 		D74E48201524F3DF00BC8B9D /* XoomlAttributeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = D74E481F1524F3DF00BC8B9D /* XoomlAttributeHelper.m */; };
 		D7947AB7152E35B10054CB23 /* NoteXooMLTemplate.xml in Resources */ = {isa = PBXBuildFile; fileRef = D7947AB6152E35B10054CB23 /* NoteXooMLTemplate.xml */; };
@@ -126,6 +127,9 @@
 		D71EA184154CD3FB00496663 /* BulletinBoardViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BulletinBoardViewController.m; sourceTree = "<group>"; };
 		D731B4BF1535F17B0015C325 /* MockDropBoxDatamodel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MockDropBoxDatamodel.h; path = IdeaStockTests/MockDropBoxDatamodel.h; sourceTree = SOURCE_ROOT; };
 		D731B4C01535F17B0015C325 /* MockDropBoxDatamodel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MockDropBoxDatamodel.m; path = IdeaStockTests/MockDropBoxDatamodel.m; sourceTree = SOURCE_ROOT; };
+		D7440EC81574C3E700C53F4A /* DropboxActionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropboxActionController.h; sourceTree = "<group>"; };
+		D7440ECA157541A500C53F4A /* DropboxAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropboxAction.h; sourceTree = "<group>"; };
+		D7440ECB157541A500C53F4A /* DropboxAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropboxAction.m; sourceTree = "<group>"; };
 		D74CF0C315266DD900DDEF0F /* BulletinboardXoomlTemplate.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = BulletinboardXoomlTemplate.xml; sourceTree = "<group>"; };
 		D74E481E1524F3DF00BC8B9D /* XoomlAttributeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XoomlAttributeHelper.h; sourceTree = "<group>"; };
 		D74E481F1524F3DF00BC8B9D /* XoomlAttributeHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XoomlAttributeHelper.m; sourceTree = "<group>"; };
@@ -288,6 +292,7 @@
 				D7B1432C1526A50400DC7556 /* AssociativeBulletinBoard.m */,
 				D7AB7DE8152F760400FC6BC0 /* DropBoxAssociativeBulletinBoard.h */,
 				D7AB7DE9152F760400FC6BC0 /* DropBoxAssociativeBulletinBoard.m */,
+				D7440EC81574C3E700C53F4A /* DropboxActionController.h */,
 				D709472915242AC3008E4AD9 /* XoomlParser.m */,
 				D71D934F15230B3D0043E573 /* BulletinBoard.h */,
 				D71D934B152301F10043E573 /* DataModel.h */,
@@ -303,6 +308,8 @@
 				D7AB7DE6152F6DB200FC6BC0 /* CallBackDataModel.h */,
 				D7DEF2C21530D37800D13CF4 /* FileSystemHelper.h */,
 				D7DEF2C31530D37800D13CF4 /* FileSystemHelper.m */,
+				D7440ECA157541A500C53F4A /* DropboxAction.h */,
+				D7440ECB157541A500C53F4A /* DropboxAction.m */,
 			);
 			name = DataModel;
 			sourceTree = "<group>";
@@ -604,6 +611,7 @@
 				D7E44BEE15643AA90080EF71 /* StackView.m in Sources */,
 				D7E44C03156573800080EF71 /* StackViewController.m in Sources */,
 				D7DD09E31572190D00918BDF /* ImageView.m in Sources */,
+				D7440ECC157541A500C53F4A /* DropboxAction.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,12 +9,15 @@
 #import "DropboxDataModel.h"
 #import "FileSystemHelper.h"
 #import "QueueProducer.h"
+#import "DropboxAction.h"
 
 #define ADD_BULLETIN_BOARD_ACTION @"addBulletinBoard"
-#define UPDATE_BULLETIN_BOARD_ACTION @"addBulletinBoard"
+#define UPDATE_BULLETIN_BOARD_ACTION @"updateBulletinBoard"
 #define ADD_NOTE_ACTION @"addNote"
 #define UPDATE_NOTE_ACTION @"updateNote"
 #define ADD_IMAGE_NOTE_ACTION @"addImage"
+#define ACTION_TYPE_CREATE_FOLDER @"createFolder"
+#define ACTION_TYPE_UPLOAD_FILE @"uploadFile"
 
 
 @interface DropboxDataModel()
@@ -34,11 +37,7 @@
  
  -------------------------------------------------*/
 
-@property NSString * action;
-@property NSString * actionPath;
-@property NSString * actionFileName;
-@property NSString * actionBulletinBoardName;
-@property NSString * actionNoteName;
+
 
 @end
 
@@ -54,11 +53,11 @@
 
 @synthesize restClient = _restClient;
 @synthesize tempDel = _tempDel;
-@synthesize action = _action;
-@synthesize actionPath = _actionPath;
-@synthesize actionBulletinBoardName = _actionBulletinBoardName;
-@synthesize actionNoteName = _actionNoteName;
-@synthesize actionFileName = _actionFileName;
+
+@synthesize actionController = _actionController;
+@synthesize actions = _actions;
+
+
 
 -(DBRestClient *) restClient{
     if (!_restClient){
@@ -76,6 +75,13 @@
 
 -(id) delegate{
     return  _restClient.delegate;
+}
+
+-(NSMutableDictionary *) actions{
+    if (!_actions){
+        _actions = [[NSMutableDictionary alloc] init];
+    }
+    return _actions;
 }
 
 /*=======================================================*/
@@ -118,20 +124,27 @@
 
     
     //set the action
-    self.action = ADD_BULLETIN_BOARD_ACTION;
-    self.actionPath = path;
-    self.actionBulletinBoardName = bulletinBoardName;
     
+    if (![self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER]){
+        [self.actions setObject:[[NSMutableDictionary alloc] init] forKey:ACTION_TYPE_CREATE_FOLDER];
+    }
+    
+    DropboxAction * action = [[DropboxAction alloc] init];
+    action.action = ADD_BULLETIN_BOARD_ACTION;
+    action.actionPath = path;
+    action.actionBulletinBoardName = bulletinBoardName;
+    
+    NSString * folderName = bulletinBoardName;
+    [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] setObject:action forKey:folderName];
 
     //now create a folder in dropbox the rest is done by the foldercreated delegate method
-    [self.restClient createFolder:bulletinBoardName];
+    [self.restClient createFolder:@"/Ali"];
 }
 
 -(void) addNote: (NSString *)noteName 
      withContent: (NSData *) note 
  ToBulletinBoard: (NSString *) bulletinBoardName{
     
-    //  noteName = @"Joojoo";
     NSError * err;
     //first write the note to the disk
     NSString * path = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
@@ -150,30 +163,39 @@
     self.restClient.delegate = self;
     
     
-    //set the action
-    self.action = ADD_NOTE_ACTION;
-    self.actionPath = path;
-    self.actionBulletinBoardName = bulletinBoardName;
-    self.actionNoteName = noteName;
-    
     
     //now upload the file to the dropbox
     //First check whether the note folder exists
     //NSString * destination = [NSString stringWithFormat: @"/%@/%@/%@", bulletinBoardName, noteName, NOTE_XOOML_FILE_NAME];
     NSString * destination = [NSString stringWithFormat: @"/%@/%@", bulletinBoardName, noteName];
     
+    
+    if (![self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER]){
+        [self.actions setObject:[[NSMutableDictionary alloc] init] forKey:ACTION_TYPE_CREATE_FOLDER];
+    }
+    
+    DropboxAction * action = [[DropboxAction alloc] init];
+    action.action = ADD_NOTE_ACTION;
+    action.actionPath = path;
+    action.actionBulletinBoardName = bulletinBoardName;
+    action.actionNoteName = noteName;
+    
+
+    [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] setObject:action forKey:destination];
+
     //the rest is done for loadedMetadata method
     [self.restClient createFolder: destination];
     
 }
 
+    
 -(void) addImageNote: (NSString *) noteName 
      withNoteContent: (NSData *) note 
             andImage: (NSData *) img 
             withImageFileName:(NSString *)imgName
      toBulletinBoard: (NSString *) bulletinBoardName{
     
-    
+    /*
     NSError * err;
     NSString * path = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
     self.actionPath = path;
@@ -208,7 +230,7 @@
     NSString * destination = [NSString stringWithFormat: @"/%@/%@", bulletinBoardName, noteName];
     
     //the rest is done for loadedMetadata method
-    [self.restClient createFolder: destination];
+    [self.restClient createFolder: destination];*/
 }
 /*--------------------------------------------------
  
@@ -218,7 +240,7 @@
 
 -(void) updateBulletinBoardWithName: (NSString *) bulletinBoardName 
                andBulletinBoardInfo: (NSData *) content{
-    
+/*    
     NSError * err;
     NSString * path = [FileSystemHelper getPathForBulletinBoardWithName:bulletinBoardName];
     [FileSystemHelper createMissingDirectoryForPath:path];
@@ -246,14 +268,14 @@
     NSString * destination = [NSString stringWithFormat:@"/%@/%@",bulletinBoardName,BULLETINBOARD_XOOML_FILE_NAME];
     [self.restClient loadMetadata:destination];
     
-    
+ */   
 }
 #define NOTE_XOOML_FILE_NAME @"XooML.xml"
 
 -(void) updateNote: (NSString *) noteName 
        withContent: (NSData *) content
    inBulletinBoard:(NSString *) bulletinBoardName{
-    
+    /*
     NSError *err;
     NSString *path = [FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName];
     [FileSystemHelper createMissingDirectoryForPath:path];
@@ -282,7 +304,7 @@
     [self.restClient loadMetadata:destination];
 
     
-    
+ */   
 }
 
 /*--------------------------------------------------
@@ -291,7 +313,9 @@
  
  -------------------------------------------------*/
 
+    
 -(void) removeBulletinBoard:(NSString *) boardName{
+    /*
     NSError * err;
     NSString * path = [FileSystemHelper getPathForBulletinBoardWithName:boardName];
     path = [path stringByDeletingLastPathComponent];
@@ -306,12 +330,13 @@
     }
     
     [self.restClient deletePath:boardName];
-    
+    */
 }
 
 -(void) removeNote: (NSString *) noteName
   FromBulletinBoard: (NSString *) bulletinBoardName{
     
+    /*
     NSError *err;
     NSString * path = [[FileSystemHelper getPathForNoteWithName:noteName inBulletinBoardWithName:bulletinBoardName] stringByDeletingLastPathComponent];
     NSFileManager * manager = [NSFileManager defaultManager];
@@ -326,10 +351,9 @@
     
     NSString * delPath = [bulletinBoardName stringByAppendingFormat:@"/%@",noteName];
     [self.restClient deletePath:delPath];
-
+*/
     
 }
-
 
 /*--------------------------------------------------
  
@@ -366,7 +390,7 @@
  -------------------------------------------------*/
 
 -(void)restClient:(DBRestClient *)client loadedMetadata:(DBMetadata *)metadata {
-    
+   /* 
     NSString * parentRev = [metadata rev];
     NSString * path = [metadata path];
                                      
@@ -388,6 +412,8 @@
         
         NSLog(@"Uploading file: %@ to destination: %@", sourcePath, path);
         [self.restClient uploadFile:BULLETINBOARD_XOOML_FILE_NAME toPath:path withParentRev:parentRev fromPath:sourcePath];
+        
+        [self.actionController setActionInProgress:NO];
         return;
     }
     
@@ -405,9 +431,11 @@
         path = [path stringByDeletingLastPathComponent];
         NSLog(@"Uploading file: %@ to destination : %@", sourcePath,path);
         [self.restClient uploadFile:NOTE_XOOML_FILE_NAME toPath:path withParentRev:parentRev fromPath:sourcePath];
+        
+        [self.actionController setActionInProgress:NO];
         return;
     }
-    
+    */
 }
 
 -(void)restClient:(DBRestClient *)client
@@ -422,65 +450,101 @@ loadMetadataFailedWithError:(NSError *)error {
     if ([self.delegate respondsToSelector:@selector(produceNext)]){
             [self.delegate produceNext];
     }
+    else{
+        [self.actionController setActionInProgress:NO];
+    }
 
 }
     
 -(void)restClient:(DBRestClient*)client createdFolder:(DBMetadata*)folder{
     
-    if ([self.action isEqualToString:ADD_BULLETIN_BOARD_ACTION]){
+    DropboxAction * actionItem;
+    
+    if ([self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER]){
+        
+        NSString * folderName = [[folder path] lastPathComponent];
+        if ([[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] objectForKey:folderName]){
+            actionItem = [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] objectForKey:folderName];
+            [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] removeObjectForKey:folderName];
+        }
+    }
+    
+    if ([actionItem.action isEqualToString:ADD_BULLETIN_BOARD_ACTION]){
         
         NSLog(@"Performing Add Bulletin board action");
-        NSLog(@"Folder Created for bulletinboard: %@ ", self.actionBulletinBoardName);
+        NSLog(@"Folder Created for bulletinboard: %@ ", actionItem.actionBulletinBoardName);
         NSString *path = [folder path];
-        NSString * sourcePath = self.actionPath;
-        //pop the self action and its path
-        self.action = nil; 
-        self.actionPath = nil;
-        self.actionBulletinBoardName = nil;
-        self.actionNoteName = nil;
+        NSString * sourcePath = actionItem.actionPath;
         
         //reset the delegate
         self.restClient.delegate = self.tempDel;
         //since its a new file the revision is set to nil
+        
+        DropboxAction * newAction = [[DropboxAction alloc] init];
+        newAction.action = ADD_BULLETIN_BOARD_ACTION;
+        newAction.actionPath = path;
+        newAction.actionFileName = BULLETINBOARD_XOOML_FILE_NAME;
+        newAction.actionBulletinBoardName = actionItem.actionBulletinBoardName;
+        
+        if (![self.actions objectForKey:ACTION_TYPE_UPLOAD_FILE]){
+            [self.actions setObject:[[NSMutableDictionary alloc] init] forKey:ACTION_TYPE_UPLOAD_FILE];
+        }
+        
+        [[self.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] setObject:newAction forKey:path];
+        
         [self.restClient uploadFile:BULLETINBOARD_XOOML_FILE_NAME toPath:path withParentRev:nil fromPath:sourcePath];
+        
+        [self.actionController setActionInProgress:NO];
+        
         return;
         
     }
     
-    
-    //TODO Right now Im assuming that there would not be consequetive add notes so there is no need for queue if this turns out wrong
-    //I will need to implement something like the queue mechanism for update note. 
-    if([self.action isEqualToString:ADD_NOTE_ACTION] ||
-       [self.action isEqualToString:ADD_IMAGE_NOTE_ACTION]){
+     
+    if([actionItem.action isEqualToString:ADD_NOTE_ACTION] ||
+       [actionItem.action isEqualToString:ADD_IMAGE_NOTE_ACTION]){
         NSLog(@"Performing Add Note action");
-        NSLog(@"Folder Created for note: %@", self.actionNoteName);
+        NSLog(@"Folder Created for note: %@", actionItem.actionNoteName);
         NSString * path = [folder path];
         
         
-        NSString * sourcePath = self.actionPath;
-        BOOL isImage = [self.action isEqualToString:ADD_IMAGE_NOTE_ACTION] ? YES: NO;
-        
-        
-        
-        //pop the self action and its path
-        self.action = nil; 
-        self.actionPath = nil;
-        self.actionBulletinBoardName = nil;
-        self.actionNoteName = nil;
+        NSString * sourcePath = actionItem.actionPath;
+        BOOL isImage = [actionItem.action isEqualToString:ADD_IMAGE_NOTE_ACTION] ? YES: NO;
+                
         self.restClient.delegate = self.tempDel;
-        
 
+        DropboxAction * newAction = [[DropboxAction alloc] init];
+        newAction.action = ADD_NOTE_ACTION;
+        newAction.actionPath = path;
+        newAction.actionNoteName = actionItem.actionNoteName;
+        newAction.actionFileName = sourcePath;
+        newAction.actionBulletinBoardName = actionItem.actionBulletinBoardName;
+        
+        if (![self.actions objectForKey:ACTION_TYPE_UPLOAD_FILE]){
+             [self.actions setObject:[[NSMutableDictionary alloc] init] forKey:ACTION_TYPE_UPLOAD_FILE];
+        }
+        [[self.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] setObject:newAction forKey:path];
+        
         [self.restClient uploadFile:NOTE_XOOML_FILE_NAME toPath:path withParentRev:nil fromPath:sourcePath];
         
         if (isImage){
             
             NSLog(@"Note is an Image");
             NSString *imgPath = [sourcePath stringByDeletingLastPathComponent];
-            imgPath = [imgPath stringByAppendingFormat:@"/%@",self.actionFileName];
+            imgPath = [imgPath stringByAppendingFormat:@"/%@",actionItem.actionFileName];
             NSLog(@"Uploading image file: from %@ to destination: %@", imgPath, path);
-            [self.restClient uploadFile:self.actionFileName toPath:path withParentRev:nil fromPath:imgPath];
-            self.actionFileName = nil;
+            
+            DropboxAction * imageAction = [[DropboxAction alloc] init];
+            imageAction.action = ADD_IMAGE_NOTE_ACTION;
+            imageAction.actionPath = path;
+            imageAction.actionNoteName = actionItem.actionNoteName;
+            imageAction.actionFileName = actionItem.actionFileName;
+            imageAction.actionBulletinBoardName = actionItem.actionBulletinBoardName;
+            
+            [[self.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] setObject:imageAction forKey:path];
+            [self.restClient uploadFile:actionItem.actionFileName toPath:path withParentRev:nil fromPath:imgPath];
         }
+        [self.actionController setActionInProgress:NO];   
     }
 }
 

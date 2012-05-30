@@ -10,13 +10,14 @@
 #import <DropboxSDK/DropboxSDK.h>
 #import "CallBackDataModel.h"
 #import "QueueProducer.h"
+#import "DropboxActionController.h"
 
 /*
  This class provides all the functionality of an associative bulletin board 
  with the extra functionality that it can also be used as a delegate for 
  responsing to the dropbox asynch calls
  */
-@interface DropBoxAssociativeBulletinBoard : AssociativeBulletinBoard <DBRestClientDelegate,QueueProducer>
+@interface DropBoxAssociativeBulletinBoard : AssociativeBulletinBoard <DBRestClientDelegate,QueueProducer,DropboxActionController>
 
 -(id) initBulletinBoardFromXoomlWithName:(NSString *)bulletinBoardName;
 

@@ -15,6 +15,15 @@
 #import "XoomlAttributeHelper.h"
 
 
+#define ADD_BULLETIN_BOARD_ACTION @"addBulletinBoard"
+#define UPDATE_BULLETIN_BOARD_ACTION @"updateBulletinBoard"
+#define ADD_NOTE_ACTION @"addNote"
+#define UPDATE_NOTE_ACTION @"updateNote"
+#define ADD_IMAGE_NOTE_ACTION @"addImage"
+#define ACTION_TYPE_CREATE_FOLDER @"createFolder"
+#define ACTION_TYPE_UPLOAD_FILE @"uploadFile"
+
+
 #define SYNCHRONIZATION_PERIOD 5
 @interface DropBoxAssociativeBulletinBoard()
 
@@ -37,6 +46,7 @@
 //any action that changes the bulletinBoard data model calls
 //this and then nothing else is needed
 @property BOOL needSynchronization;
+
 @property NSTimer * timer;
 
 /*--------------------------------------------------
@@ -68,6 +78,7 @@
 @synthesize  timer = _timer;
 @synthesize demoNoteName = _demoNoteName;
 @synthesize demoBulletinBoardName = _demoBulletinBoardName;
+@synthesize actionInProgress = _actionInProgress;
 
 - (NSMutableArray *) queue{
     if (!_queue){
@@ -115,10 +126,15 @@
 
 -(void) synchronize:(NSTimer *) timer{
     
+    if (self.actionInProgress){
+        NSLog(@"Synchronization postponed due to an unfinished or failed action");
+        return;
+    }
     if (self.needSynchronization){
         self.needSynchronization = NO;
         NSLog(@"==================");
         NSLog(@"Synchronizing");
+        self.actionInProgress = YES;
         [DropBoxAssociativeBulletinBoard saveBulletinBoard: self];
     }
 }
@@ -145,6 +161,10 @@
 
 -(id) initEmptyBulletinBoardWithDataModel:(id<DataModel>)dataModel 
                                   andName:(NSString *)bulletinBoardName{
+    
+    if ( [dataModel isKindOfClass:[DropboxDataModel class]]){
+        ((DropboxDataModel *) dataModel).actionController = self;
+    }
     self = [super initEmptyBulletinBoardWithDataModel:dataModel
                                               andName:bulletinBoardName];
     [self startTimer];
@@ -152,9 +172,12 @@
     
 }
 
--(id) initBulletinBoardFromXoomlWithDatamodel:(id<DataModel>)datamodel
+-(id) initBulletinBoardFromXoomlWithDatamodel:(id<DataModel>)dataModel
                                       andName:(NSString *)bulletinBoardName{
-    self.dataModel = datamodel;
+    self.dataModel = dataModel;
+    if ( [dataModel isKindOfClass:[DropboxDataModel class]]){
+        ((DropboxDataModel *) dataModel).actionController = self;
+    }
     return [self initBulletinBoardFromXoomlWithName:bulletinBoardName];
 }
 
@@ -164,7 +187,9 @@
     self = [super initBulletinBoardFromXoomlWithDatamodel:self.dataModel andName:bulletinBoardName];
     
     [(id <CallBackDataModel>) self.dataModel setDelegate:self];
-    
+    if ( [self.dataModel isKindOfClass:[DropboxDataModel class]]){
+        ((DropboxDataModel *) self.dataModel).actionController = self;
+    }
     //count the number of file to know when the download is finished
     self.fileCounter = 0;
     [(DropboxDataModel <CallBackDataModel> *) self.dataModel getBulletinBoardAsynch:bulletinBoardName];
@@ -303,8 +328,10 @@
 
 -(void) addNoteContent: (id <Note>) note 
          andProperties: (NSDictionary *) properties{
+
     [super addNoteContent:note andProperties:properties];
     
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -313,6 +340,7 @@
                     andImage: (NSData *) img{
     [super addImageNoteContent:noteItem andProperties:noteProperties andImage:img];
     
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
     
 }
@@ -325,7 +353,7 @@
            forAttributeType:attributeType 
                     forNote:noteID 
                   andValues:values];
-    
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -337,7 +365,7 @@ forAttributeType: (NSString *) attributeType
    toAttributeName:attributeName 
   forAttributeType:attributeType 
             ofNote:sourceNoteId];
-    
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -348,6 +376,7 @@ toBulletinBoardAttribute:(NSString *)attributeName
 toBulletinBoardAttribute:attributeName
         forAttributeType:attributeType];
     
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -360,6 +389,7 @@ toBulletinBoardAttribute:attributeName
 -(void) removeNoteWithID:(NSString *)delNoteID{
     [super removeNoteWithID:delNoteID];
     
+    self.actionInProgress = YES;
     self.needSynchronization = true;
 }
 
@@ -372,6 +402,7 @@ toBulletinBoardAttribute:attributeName
                ofType:attributeType 
      fromAttributesOf:sourceNoteID];
     
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -382,6 +413,7 @@ toBulletinBoardAttribute:attributeName
                         ofType:attributeType 
                       FromNote:noteID];
     
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -392,6 +424,7 @@ fromBulletinBoardAttribute: (NSString *) attributeName
 fromBulletinBoardAttribute:attributeName
                ofType:attributeType];
     
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -399,6 +432,7 @@ fromBulletinBoardAttribute:attributeName
                               ofType:(NSString *)attributeType{
     [super removeBulletinBoardAttribute:attributeName 
                                  ofType:attributeType];
+    self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -417,7 +451,7 @@ fromBulletinBoardAttribute:attributeName
                         ofType:attributeType
                        forNote:noteID
                       withName:newAttributeName];
-    
+        self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -429,7 +463,7 @@ fromBulletinBoardAttribute:attributeName
                         ofType:attributeType
                        forNote:noteID 
                  withNewValues:newValues];
-    
+        self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -439,14 +473,14 @@ fromBulletinBoardAttribute:attributeName
     [super renameBulletinBoardAttribute:oldAttributeNAme
                                  ofType:attributeType 
                                withName:newAttributeName];
-    
+        self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
 
 -(void) updateNoteProperties:(NSString *)noteID withProperties:(NSDictionary *)newProperties{
     [super updateNoteProperties:noteID withProperties:newProperties];
-    
+        self.actionInProgress = YES;
     self.needSynchronization = YES;
 }
 
@@ -524,6 +558,7 @@ fromBulletinBoardAttribute:attributeName
         //all the bulletinboard files are downloaded
         //now initialize the bulletinBoard. 
         NSLog(@"All Files Download");
+        
         [self initiateBulletinBoad];
     }
     
@@ -535,9 +570,19 @@ fromBulletinBoardAttribute:attributeName
 
 - (void)restClient:(DBRestClient*)client uploadedFile:(NSString*)destPath from:(NSString*)srcPath 
           metadata:(DBMetadata*)metadata{
-    NSLog(@"Successfully Uploaded File from %@ to %@", srcPath,destPath);
-    //now synchronize everything to the dropbox
-    //this is like saving to make sure everything is reflected
+    
+    NSString * destPathOrg = [destPath stringByDeletingLastPathComponent];
+    if ([self.dataModel isKindOfClass:[DropboxDataModel class]]){
+        DropboxDataModel * dropbox = (DropboxDataModel *) self.dataModel;
+        if ([dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE]){
+            if ([[dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] objectForKey:destPathOrg]){
+                NSLog(@"Successfully Uploaded File from %@ to %@", srcPath,destPath);
+                [[dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] removeObjectForKey:destPathOrg];
+                
+                self.actionInProgress = NO;
+            }
+        }
+    }
     
 }
 
@@ -548,6 +593,7 @@ fromBulletinBoardAttribute:attributeName
 
 - (void)restClient:(DBRestClient*)client deletedPath:(NSString *)path{
     NSLog(@"Successfully deleted path : %@", path);
+    self.actionInProgress = NO;
     
 }
 - (void)restClient:(DBRestClient*)client deletePathFailedWithError:(NSError*)error{
@@ -561,6 +607,7 @@ fromBulletinBoardAttribute:attributeName
  -------------------------------------------------*/
 
 -(void) putIntoQueue: (id) item{
+    NSLog(@"putting an update action into Queue");
     [self.queue addObject:item];    
 }
 
@@ -572,14 +619,17 @@ fromBulletinBoardAttribute:attributeName
 #define NOTE_NAME_TYPE @"name"
 -(void) produceNext{
     //we are done
-    if ([self.queue count] == 0) return;
+    if ([self.queue count] == 0){
+        self.actionInProgress = NO;
+        return;
+    }
     
     NSString * noteID = [self.queue lastObject];
     [self.queue removeLastObject];
     NSData * noteData = [XoomlParser convertNoteToXooml:[self.noteContents objectForKey:noteID]];
     BulletinBoardAttributes * noteAttributes = [self.noteAttributes objectForKey:noteID];
     NSString * noteName = [[noteAttributes getAttributeWithName:NOTE_NAME forAttributeType:NOTE_NAME_TYPE] lastObject];
-    
+    NSLog(@"Picking another update action from Queue");
     [self.dataModel updateNote:noteName withContent:noteData inBulletinBoard:self.bulletinBoardName];
     
     

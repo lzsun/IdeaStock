@@ -10,8 +10,14 @@
 #import "DataModel.h"
 #import <DropboxSDK/DropboxSDK.h>
 #import "CallBackDataModel.h"
+#import "DropboxActionController.h"
 
 @interface DropboxDataModel : NSObject <DataModel,CallBackDataModel,DBRestClientDelegate> 
+
+
+//action keyed on the action type
+@property (nonatomic,strong) NSMutableDictionary * actions;
+
 
 @property  (nonatomic, strong) DBRestClient *restClient;
 
@@ -31,6 +37,11 @@
 //TODO I am not sure whether this is really an implementation of the DataModel protocol
 //because it is somehow changing its behavior . 
 
+
+/*
+ This makes sure that no two tasks that can interfere , interfere with each other.
+ */
+@property (nonatomic,strong) id<DropboxActionController> actionController;
 
 -(void) getAllBulletinBoardsAsynch;
 

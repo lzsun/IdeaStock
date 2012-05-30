@@ -10,13 +10,15 @@
 #import "XoomlBulletinBoardController.h"
 #import "BulletinBoardViewController.h"
 #import "DropBoxAssociativeBulletinBoard.h"
+#define ACTION_TYPE_CREATE_FOLDER @"createFolder"
+#define ACTION_TYPE_UPLOAD_FILE @"uploadFile"
 
 @interface MainScreenDropboxViewController ()
 
 /*========================================================================*/
 
 /*------------------------------------------------
-                    UI properties
+ UI properties
  -------------------------------------------------*/
 @property (weak, nonatomic) IBOutlet UIView *prototypeView;
 @property (weak, nonatomic) IBOutlet UIScrollView *mainView;
@@ -24,15 +26,15 @@
 @property (strong, nonatomic) NSMutableArray * bulletinBoardViews; 
 
 
+
 /*------------------------------------------------
-                    Model
+ Model
  -------------------------------------------------*/
 
 //this is the main model that will be initialized from dropbox. 
 @property (nonatomic,strong) NSMutableArray * bulletinBoardNames;
-
 /*------------------------------------------------
-                    Modal Properties
+ Modal Properties
  -------------------------------------------------*/
 @property CGRect lastFrame;
 
@@ -45,7 +47,7 @@
 
 
 /*------------------------------------------------
-                Synthesizers
+ Synthesizers
  -------------------------------------------------*/
 
 
@@ -60,6 +62,7 @@
 @synthesize colorOrder = _colorOrder;
 @synthesize lastView = _lastView;
 @synthesize lastFrame = _lastFrame;
+@synthesize actionInProgress = _actionInProgress;
 
 
 -(NSMutableArray *) bulletinBoardViews{
@@ -82,6 +85,7 @@
     
     if (!_dropBox){
         _dropBox = [[DropboxDataModel alloc] init];
+        
     }
     return _dropBox;
 }
@@ -90,7 +94,7 @@
 
 
 /*------------------------------------------------
-                    Initializers
+ Initializers
  -------------------------------------------------*/
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil{
@@ -103,7 +107,7 @@
 }
 
 /*------------------------------------------------
-                    Layout Methods
+ Layout Methods
  -------------------------------------------------*/
 
 -(UIView *) createBulletinBoardPreviewWithName: (NSString *) name 
@@ -134,7 +138,7 @@
     [label setBackgroundColor:[UIColor clearColor]];
     label.textAlignment = UITextAlignmentCenter;
     label.font = [UIFont fontWithName:@"Baskerville Bold" size:17.0];
-   
+    
     [view addSubview:label];
     
     [view setUserInteractionEnabled:YES];
@@ -181,8 +185,8 @@
         
         for (UIView * view in self.bulletinBoardViews){
             
-           /* CGFloat bulletinBoardWidth = self.mainView.bounds.size.width * 0.31;
-            CGFloat bulletinBoardHeight = self.mainView.bounds.size.height * 0.25;**/
+            /* CGFloat bulletinBoardWidth = self.mainView.bounds.size.width * 0.31;
+             CGFloat bulletinBoardHeight = self.mainView.bounds.size.height * 0.25;**/
             CGFloat bulletinBoardWidth = self.mainView.bounds.size.width * 0.26;
             CGFloat bulletinBoardHeight = self.mainView.bounds.size.height * 0.20;
             
@@ -256,7 +260,7 @@
         
         for (UIView * view in self.bulletinBoardViews){
             
-                       
+            
             CGRect frame = CGRectMake(initPointX, initPointY, bulletinBoardWidth * 0.8, bulletinBoardHeight * 1.2);
             
             if(animation){
@@ -319,7 +323,7 @@
 }
 
 /*------------------------------------------------
-                   Animation methods
+ Animation methods
  -------------------------------------------------*/
 
 -(void) animateAdd: (UIView *) view{
@@ -390,19 +394,19 @@
 -(void) animateReturn{
     
     
-
+    
     [UIView animateWithDuration:1.0 animations:^{ self.lastView.alpha = 1;}];
     
     [UIView animateWithDuration:1.0
                           delay:0
                         options:UIViewAnimationOptionLayoutSubviews
                      animations:^{
-                            
-                        
-                        UILabel * viewLabel = (UILabel *)[[self.lastView subviews] objectAtIndex:0];
-
+                         
+                         
+                         UILabel * viewLabel = (UILabel *)[[self.lastView subviews] objectAtIndex:0];
+                         
                          viewLabel.alpha = 1;
-                        // viewLabel.transform = CGAffineTransformIdentity;
+                         // viewLabel.transform = CGAffineTransformIdentity;
                          
                          self.lastView.transform = CGAffineTransformIdentity;
                          self.lastView.frame = self.lastFrame;
@@ -424,7 +428,7 @@
 }
 
 /*------------------------------------------------
-                    UI Event helpers
+ UI Event helpers
  -------------------------------------------------*/
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
@@ -471,7 +475,7 @@
 }
 
 /*------------------------------------------------
-                    UI Events
+ UI Events
  -------------------------------------------------*/
 
 -(IBAction) AddPressed:(id)sender {
@@ -503,21 +507,21 @@
     
     /*UIImage * image = [UIImage imageNamed:@"skybacground.jpg"];
      UIColor * color = [UIColor colorWithPatternImage:image];
-    [self.mainView setBackgroundColor:color];*/
+     [self.mainView setBackgroundColor:color];*/
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 }
 
 -(void) viewDidLoad{
     
- /*   UIImage * img = [UIImage imageNamed:@"skybacground.jpg"];
-    UIImageView * imgView =[[UIImageView alloc] initWithFrame:self.mainView.frame];
-    imgView.image = img;
-    UIView * superView =  self.mainView.superview;
-    [self.mainView removeFromSuperview];
-    // [self.mainView addSubview:imgView];
-    //[imgView addSubview:self.mainView];
-    [superView addSubview:imgView];
-    [superView addSubview:self.mainView];*/
+    /*   UIImage * img = [UIImage imageNamed:@"skybacground.jpg"];
+     UIImageView * imgView =[[UIImageView alloc] initWithFrame:self.mainView.frame];
+     imgView.image = img;
+     UIView * superView =  self.mainView.superview;
+     [self.mainView removeFromSuperview];
+     // [self.mainView addSubview:imgView];
+     //[imgView addSubview:self.mainView];
+     [superView addSubview:imgView];
+     [superView addSubview:self.mainView];*/
     [self.mainView setBackgroundColor: [UIColor clearColor]];
     
     [super viewDidLoad];
@@ -534,6 +538,7 @@
     //TODO make delegate a property so you can access it by dropbox.delegate
     
     [self.dropBox setDelegate: self];
+    [self.dropBox setActionController:self];
     [self.dropBox getAllBulletinBoardsAsynch];
     
     
@@ -558,7 +563,7 @@
 }
 
 /*------------------------------------------------
-            Dropbox Delegate Protocol
+ Dropbox Delegate Protocol
  -------------------------------------------------*/
 
 -(void) restClient:(DBRestClient *)client loadedMetadata:(DBMetadata *)metadata{
@@ -576,13 +581,28 @@
     
 }
 
+- (void)restClient:(DBRestClient*)client uploadedFile:(NSString*)destPath from:(NSString*)srcPath 
+          metadata:(DBMetadata*)metadata{
+    NSString * destPathOrg = [destPath stringByDeletingLastPathComponent];
+    
+    if ([self.dropBox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE]){
+        if ([[self.dropBox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] objectForKey:destPathOrg]){
+            NSLog(@"Successfully Uploaded File from %@ to %@", srcPath,destPath);
+            [[self.dropBox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] removeObjectForKey:destPathOrg];
+            NSLog(@"%@",self.dropBox.actions);
+            self.actionInProgress = NO;
+        }
+    }
+    
+    
+}
 -(void) restClient:(DBRestClient*)client loadMetadataFailedWithError:(NSError*)error{
     
     NSLog(@"Failutre: %@",error);
 }
 
 /*------------------------------------------------
-            Bulletinboard Delegate Protocol
+ Bulletinboard Delegate Protocol
  -------------------------------------------------*/
 
 -(void) finishedWorkingWithBulletinBoard{
@@ -592,7 +612,7 @@
 
 
 /*------------------------------------------------
-            Queue Delegate Protocol
+ Queue Delegate Protocol
  -------------------------------------------------*/
 
 /*
