@@ -74,7 +74,8 @@
 @synthesize dataModel = _dataModel;
 @synthesize fileCounter = _fileCounter;
 @synthesize queue = _queue;
-@synthesize  needSynchronization = _needSynchronization;
+@synthesize  needSynchronization =
+_needSynchronization;
 @synthesize  timer = _timer;
 @synthesize demoNoteName = _demoNoteName;
 @synthesize demoBulletinBoardName = _demoBulletinBoardName;
@@ -126,15 +127,20 @@
 
 -(void) synchronize:(NSTimer *) timer{
     
+    NSLog(@"Periodic Queue: %@",((DropboxDataModel *) self.dataModel).actions);
     if (self.actionInProgress){
         NSLog(@"Synchronization postponed due to an unfinished or failed action");
         return;
     }
     if (self.needSynchronization){
-        self.needSynchronization = NO;
         NSLog(@"==================");
         NSLog(@"Synchronizing");
-        self.actionInProgress = YES;
+        
+        NSLog(@"Synchronization queue: ");
+        NSLog(@"%@", ((DropboxDataModel *) self.dataModel).actions);
+        self.needSynchronization = NO;
+        
+       // self.actionInProgress = YES;
         [DropBoxAssociativeBulletinBoard saveBulletinBoard: self];
     }
 }
@@ -576,9 +582,10 @@ fromBulletinBoardAttribute:attributeName
         DropboxDataModel * dropbox = (DropboxDataModel *) self.dataModel;
         if ([dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE]){
             if ([[dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] objectForKey:destPathOrg]){
+                NSLog(@"Available Actions: %@",dropbox.actions);
                 NSLog(@"Successfully Uploaded File from %@ to %@", srcPath,destPath);
                 [[dropbox.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] removeObjectForKey:destPathOrg];
-                
+                NSLog(@"Remaining Actions: %@",dropbox.actions);
                 self.actionInProgress = NO;
             }
         }

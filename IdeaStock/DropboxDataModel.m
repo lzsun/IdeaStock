@@ -138,7 +138,7 @@
     [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] setObject:action forKey:folderName];
 
     //now create a folder in dropbox the rest is done by the foldercreated delegate method
-    [self.restClient createFolder:@"/Ali"];
+    [self.restClient createFolder:folderName];
 }
 
 -(void) addNote: (NSString *)noteName 
@@ -163,7 +163,6 @@
     self.restClient.delegate = self;
     
     
-    
     //now upload the file to the dropbox
     //First check whether the note folder exists
     //NSString * destination = [NSString stringWithFormat: @"/%@/%@/%@", bulletinBoardName, noteName, NOTE_XOOML_FILE_NAME];
@@ -180,8 +179,8 @@
     action.actionBulletinBoardName = bulletinBoardName;
     action.actionNoteName = noteName;
     
-
-    [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] setObject:action forKey:destination];
+    NSString * folderName = [destination lastPathComponent];
+    [[self.actions objectForKey:ACTION_TYPE_CREATE_FOLDER] setObject:action forKey:folderName];
 
     //the rest is done for loadedMetadata method
     [self.restClient createFolder: destination];
@@ -240,7 +239,9 @@
 
 -(void) updateBulletinBoardWithName: (NSString *) bulletinBoardName 
                andBulletinBoardInfo: (NSData *) content{
-/*    
+    [self.actionController setActionInProgress:NO];
+    
+    /*    
     NSError * err;
     NSString * path = [FileSystemHelper getPathForBulletinBoardWithName:bulletinBoardName];
     [FileSystemHelper createMissingDirectoryForPath:path];
@@ -525,6 +526,7 @@ loadMetadataFailedWithError:(NSError *)error {
         }
         [[self.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] setObject:newAction forKey:path];
         
+        [self.actionController setActionInProgress:YES];
         [self.restClient uploadFile:NOTE_XOOML_FILE_NAME toPath:path withParentRev:nil fromPath:sourcePath];
         
         if (isImage){
@@ -541,10 +543,11 @@ loadMetadataFailedWithError:(NSError *)error {
             imageAction.actionFileName = actionItem.actionFileName;
             imageAction.actionBulletinBoardName = actionItem.actionBulletinBoardName;
             
+            
             [[self.actions objectForKey:ACTION_TYPE_UPLOAD_FILE] setObject:imageAction forKey:path];
+            [self.actionController setActionInProgress:YES];
             [self.restClient uploadFile:actionItem.actionFileName toPath:path withParentRev:nil fromPath:imgPath];
-        }
-        [self.actionController setActionInProgress:NO];   
+        } 
     }
 }
 
