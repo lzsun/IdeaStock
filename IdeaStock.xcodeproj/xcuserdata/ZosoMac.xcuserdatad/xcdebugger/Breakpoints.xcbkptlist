@@ -528,11 +528,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "IdeaStock/StackView.m"
-         timestampString = "360131625.287331"
+         timestampString = "360136115.206847"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "119"
-         endingLineNumber = "119"
+         startingLineNumber = "140"
+         endingLineNumber = "140"
          landmarkName = "-setText:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1002,6 +1002,19 @@
          startingLineNumber = "682"
          endingLineNumber = "682"
          landmarkName = "-does:OverlapWithView:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "IdeaStock/StackView.m"
+         timestampString = "360135903.774666"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "112"
+         endingLineNumber = "112"
+         landmarkName = "-setHighlighted:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

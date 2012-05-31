@@ -96,19 +96,40 @@
 -(void) setHighlighted:(BOOL) highlighted{
     
     _highlighted = highlighted;
-    
+    UIImageView * img;
     for (UIView * subView in self.subviews){
         if (highlighted){
             
             if ([subView isKindOfClass:[UIImageView class]]){
                 [((UIImageView *) subView) setImage:self.highlightedImage];
-                [UIView animateWithDuration:0.20 animations:^{[subView setTransform:CGAffineTransformMakeScale(1.3, 1.4)];}];                              
+
+                for (UIView * imgView in subView.subviews){
+                    if ([imgView isKindOfClass:[UIImageView class]]){
+                        img = (UIImageView *) imgView;
+                    }
+                }
+                [UIView animateWithDuration:0.20 animations:^{
+                    
+                    [subView setTransform:CGAffineTransformMakeScale(1.3, 1.4)];
+                    [img setTransform:CGAffineTransformMakeScale(0.9, 0.8)];
+
+                }];                              
             }
         }
         else{
             if ([subView isKindOfClass:[UIImageView class]]){
                 [((UIImageView *) subView) setImage:self.normalImage];
-                [UIView animateWithDuration:0.20 animations:^{[subView setTransform:CGAffineTransformIdentity];}];
+                
+                for (UIView * imgView in subView.subviews){
+                    if ([imgView isKindOfClass:[UIImageView class]]){
+                        img = (UIImageView *) imgView;
+                    }
+                }
+
+                [UIView animateWithDuration:0.20 animations:^{
+                    [subView setTransform:CGAffineTransformIdentity];
+                    [img setTransform:CGAffineTransformIdentity];
+                }];
             }
             
         }
