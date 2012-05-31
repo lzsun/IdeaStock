@@ -144,7 +144,7 @@
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ITEM stringValue:note.image]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ICON stringValue:@""]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_XOOML_FRAGMENT stringValue:@""]];
-    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:LEVEL_OF_SYNCHRONIZATION stringValue:@""]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:LEVEL_OF_SYNCHRONIZATION stringValue:@"0"]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:DISPLAY_TEXT stringValue:note.noteText]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:OPEM_WITH_DEFAULT stringValue:@""]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:CREATED_BY stringValue:APP_NAME]];
@@ -152,9 +152,32 @@
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:MODIFIED_BY stringValue:APP_NAME]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:MODIFIED_ON stringValue:note.modificationDate]];
 
-    //TODO Add tool specific child of the association here
+    DDXMLElement * planzHeader = [[DDXMLElement alloc] initWithName:@"xooml:fragmentToolAttributes"];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"xmlns" stringValue:@"http://kftf.ischool.washington.edu/xmlns/planz"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"toolVersion" stringValue:@"1.0.7"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"toolName" stringValue:@"Planz"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"startDate" stringValue:@"1/1/0001 12:00 AM"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"dueDate" stringValue:@"1/1/0001 12:00 AM"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"showAssociationMarkedDone" stringValue:@"False"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"showAssociationMarkedDefer" stringValue:@"False"]];
     
+    [root addChild:planzHeader];
+    DDXMLElement * planzHeader2 = [[DDXMLElement alloc] initWithName:@"xooml:associationToolAttributes"];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"xmlns" stringValue:@"http://kftf.ischool.washington.edu/xmlns/planz"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"type" stringValue:@"Note"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"associatedItemType" stringValue:@"None"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"isVisible" stringValue:@"True"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"isCollapsed" stringValue:@"True"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"status" stringValue:@"Normal"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"powerDStatus" stringValue:@"None"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"powerDTimeStamp" stringValue:@"3/28/2012 12:44 PM"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"fontColor" stringValue:@"Black"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"flagStatus" stringValue:@"Normal"]];
+                                  
+    //TODO Add tool specific child of the association here
+    [xoomlAssociation addChild:planzHeader2];
     //Add association as a chile of root
+
     [root addChild:xoomlAssociation];
     
     //create the xml string by appending standard xml headers
@@ -192,7 +215,7 @@
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ITEM stringValue:imageName]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_ICON stringValue:@""]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:ASSOCIATED_XOOML_FRAGMENT stringValue:@""]];
-    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:LEVEL_OF_SYNCHRONIZATION stringValue:@""]];
+    [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:LEVEL_OF_SYNCHRONIZATION stringValue:@"0"]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:DISPLAY_TEXT stringValue:note.noteText]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:OPEM_WITH_DEFAULT stringValue:@""]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:CREATED_BY stringValue:APP_NAME]];
@@ -200,6 +223,32 @@
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:MODIFIED_BY stringValue:APP_NAME]];
     [xoomlAssociation addAttribute:[DDXMLNode attributeWithName:MODIFIED_ON stringValue:note.modificationDate]];
     
+    
+    DDXMLElement * planzHeader = [[DDXMLElement alloc] initWithName:@"xooml:fragmentToolAttributes"];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"xmlns" stringValue:@"http://kftf.ischool.washington.edu/xmlns/planz"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"toolVersion" stringValue:@"1.0.7"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"toolName" stringValue:@"Planz"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"startDate" stringValue:@"1/1/0001 12:00 AM"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"dueDate" stringValue:@"1/1/0001 12:00 AM"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"showAssociationMarkedDone" stringValue:@"False"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"showAssociationMarkedDefer" stringValue:@"False"]];
+    
+    [root addChild:planzHeader];
+    DDXMLElement * planzHeader2 = [[DDXMLElement alloc] initWithName:@"xooml:associationToolAttributes"];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"xmlns" stringValue:@"http://kftf.ischool.washington.edu/xmlns/planz"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"type" stringValue:@"Note"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"associatedItemType" stringValue:@"None"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"isVisible" stringValue:@"True"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"isCollapsed" stringValue:@"True"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"status" stringValue:@"Normal"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"powerDStatus" stringValue:@"None"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"powerDTimeStamp" stringValue:@"3/28/2012 12:44 PM"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"fontColor" stringValue:@"Black"]];
+    [planzHeader2 addAttribute:[DDXMLNode attributeWithName:@"flagStatus" stringValue:@"Normal"]];
+    
+    //TODO Add tool specific child of the association here
+    [xoomlAssociation addChild:planzHeader2];
+    //Add association as a chile of root
     //TODO Add tool specific child of the association here
     
     //Add association as a chile of root
@@ -228,6 +277,19 @@
     [root addAttribute: [DDXMLNode attributeWithName:@"defaultApplication" stringValue:@""]];
     [root addAttribute: [DDXMLNode attributeWithName:@"relatedItem" stringValue:@""]];
     
+    
+    
+    //TODO remove this planz compatibility issues, this is a bug with planz
+    DDXMLElement * planzHeader = [[DDXMLElement alloc] initWithName:@"xooml:fragmentToolAttributes"];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"xmlns" stringValue:@"http://kftf.ischool.washington.edu/xmlns/planz"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"toolVersion" stringValue:@"1.0.7"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"toolName" stringValue:@"Planz"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"startDate" stringValue:@"1/1/0001 12:00 AM"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"dueDate" stringValue:@"1/1/0001 12:00 AM"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"showAssociationMarkedDone" stringValue:@"False"]];
+    [planzHeader addAttribute:[DDXMLNode attributeWithName:@"showAssociationMarkedDefer" stringValue:@"False"]];
+
+    [root addChild:planzHeader];
     //because I can't use the method [[DDXMLDocument alloc] initWithRootElement:] 
     //since its not available in KissXML , I have to provide this hack
     //Make a string from the root element add XML headers to it, convert it to

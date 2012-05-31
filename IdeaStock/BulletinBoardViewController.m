@@ -147,6 +147,50 @@
 -(void) stackNotes: (NSArray *) items into: (UIView *) mainView withID: (NSString *) ID{
     __block BOOL first = YES;
     
+    CGRect stackFrame;
+    if (first){
+        if ([mainView isKindOfClass:[NoteView class]]){
+            stackFrame = CGRectMake(mainView.frame.origin.x - ((STACKING_SCALING_WIDTH -1)/4) * mainView.frame.origin.x,
+                                    mainView.frame.origin.y - ((STACKING_SCALING_HEIGHT -1)/4) * mainView.frame.origin.y,
+                                    mainView.bounds.size.width * STACKING_SCALING_WIDTH,
+                                    mainView.bounds.size.height * STACKING_SCALING_HEIGHT );
+        }
+        else if ([mainView isKindOfClass:[StackView class]]){
+            stackFrame = mainView.frame;
+        }
+    }
+    
+    NSMutableArray * allNotes = [self getAllNormalNotesInViews:items];
+    NSString * stackingID ;
+    
+    if (!ID){
+        stackingID = [self normalizeStackingWithItems: (NSArray *)items 
+                                          andMainView: (UIView *) mainView];
+    }
+    else{
+        stackingID = ID;
+    }
+    StackView * stack = [[StackView alloc] initWithViews:allNotes
+                                             andMainView:(NoteView *)mainView
+                                               withFrame:
+                         stackFrame];
+    [UIView animateWithDuration:0.5 animations:^{mainView.alpha = 0;}];
+    [mainView removeFromSuperview];
+    mainView.alpha = 1;
+    stack.alpha =0;
+    stack.ID = stackingID;
+    UIPanGestureRecognizer * gr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(objectPanned:)];
+    UIPinchGestureRecognizer * pgr = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(objectPinched:)];
+    UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(stackTapped:)];
+    UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(objectPressed:)];
+    [stack addGestureRecognizer:gr];
+    [stack addGestureRecognizer:pgr];
+    [stack addGestureRecognizer:tgr];
+    [stack addGestureRecognizer:lpgr];
+    [self.bulletinboardView addSubview:stack];
+    [UIView animateWithDuration:0.5 animations:^{stack.alpha = 1;}];
+    
+    
     for (UIView * view in items){
         if (view != mainView){
             [UIView animateWithDuration:0.5
@@ -161,7 +205,7 @@
                                      }
                                  }
                                  [view removeFromSuperview];
-                                 if (first){
+                               /*  if (first){
                                      CGRect stackFrame;
                                      if ([mainView isKindOfClass:[NoteView class]]){
                                          stackFrame = CGRectMake(mainView.frame.origin.x - ((STACKING_SCALING_WIDTH -1)/4) * mainView.frame.origin.x,
@@ -171,9 +215,9 @@
                                      }
                                      else if ([mainView isKindOfClass:[StackView class]]){
                                          stackFrame = mainView.frame;
-                                     }
+                                     }*/
                                      
-                                     NSMutableArray * allNotes = [self getAllNormalNotesInViews:items];
+                                   /*  NSMutableArray * allNotes = [self getAllNormalNotesInViews:items];
                                      NSString * stackingID ;
                                      
                                      if (!ID){
@@ -186,8 +230,8 @@
                                      StackView * stack = [[StackView alloc] initWithViews:allNotes
                                                                               andMainView:(NoteView *)mainView
                                                                                 withFrame:
-                                                          stackFrame];
-                                     [UIView animateWithDuration:0.5 animations:^{mainView.alpha = 0;}];
+                                                          stackFrame];*/
+                                   /*  [UIView animateWithDuration:0.5 animations:^{mainView.alpha = 0;}];
                                      [mainView removeFromSuperview];
                                      mainView.alpha = 1;
                                      stack.alpha =0;
@@ -202,10 +246,10 @@
                                      [stack addGestureRecognizer:lpgr];
                                      [self.bulletinboardView addSubview:stack];
                                      [UIView animateWithDuration:0.5 animations:^{stack.alpha = 1;}];
-                                     first = NO;
+                                     first = NO;*/
                                      
-                                 }
-                             }];
+                            
+                            }];
         }
     }    
 }
@@ -344,7 +388,6 @@
 
     NSLog(@"Reading Bulletinboard data from the filesytem");
     NSLog(@"----------------------------");
-    self.isRefreshing = NO;
     [self layoutNotes];
 }
 
@@ -427,7 +470,18 @@
 -(void) layoutStackings{
     NSLog(@"Laying Stackings");
     NSDictionary * stackings =[self.board getAllBulletinBoardAttributeNamesOfType:STACKING_TYPE];
+    for (UIView * view in self.bulletinboardView.subviews){
+        NSLog(@"%@",view);
+        if ([view isKindOfClass:[StackView class]]){
+            NSLog(@"Removing Stacking");
+            [view removeFromSuperview ];
+        }
+    }
+    NSLog(@"Stackings loaded : %@", stackings);
+    int count = 1;
     for(NSString * stackingID in stackings){
+        NSLog(@"%d",count);
+        count++;
         NSMutableArray * views = [[NSMutableArray alloc] init];
         NSArray * noteRefIDs = [stackings objectForKey:stackingID];
         NSSet * noteRefs = [[NSSet alloc] initWithArray:noteRefIDs];
@@ -448,6 +502,8 @@
         
         [self stackNotes:views into:mainView withID:stackingID];
     }
+    
+        self.isRefreshing = NO;
 }
 #define EXPAND_COL_SIZE 5
 #define SEPERATOR_RATIO 0.1
