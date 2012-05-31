@@ -954,9 +954,10 @@
 
 -(void) objectPinched: (UIPinchGestureRecognizer *) sender{
     
-    if (self.editMode) return;
+//    if (self.editMode) return;
     if (sender.state == UIGestureRecognizerStateChanged ||
         sender.state == UIGestureRecognizerStateEnded){
+        NSLog(@"JERE");
         CGFloat scale = sender.scale;
         if ([sender.view conformsToProtocol: @protocol(BulletinBoardObject)]){
             UIView <BulletinBoardObject> * view = (NoteView *) sender.view;
