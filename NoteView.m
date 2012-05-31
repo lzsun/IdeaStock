@@ -74,7 +74,7 @@
             if ([subView isKindOfClass:[UIImageView class]]){
                 
                 [((UIImageView *) subView) setImage:self.highLightedImage];
-                [UIView animateWithDuration:0.20 animations:^{                [subView setTransform:CGAffineTransformMakeScale(1.4, 1.5)];}];                             
+                [UIView animateWithDuration:0.20 animations:^{                [subView setTransform:CGAffineTransformMakeScale(1.2, 1.3)];}];                             
             }
         }
         else{
@@ -297,4 +297,9 @@
     [self.delegate note:self changedTextTo:text];
 }
 
+- (void)textViewDidBeginEditing:(UITextView *)textView{
+    if ([textView.text isEqualToString:@"Tap To Edit Note"]){
+        textView.text = @"";
+    }
+}
 @end

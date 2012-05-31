@@ -424,18 +424,19 @@
 
 -(IBAction)unstackPressed:(id)sender {
     
+    [self.notes removeObject:self.highLightedNote];
+    self.highLightedNote.highlighted = NO;
+    [self.highLightedNote removeFromSuperview];
+    self.unstackCounter++;
+    [self.delegate unstackItem:self.highLightedNote
+                      fromView:self.openStack 
+                 withPastCount:self.unstackCounter];
+    [self removeToolbarItems];
+    self.editing = NO;
+    self.highLightedNote = nil;
+    [self layoutNotes: YES];
     [UIView animateWithDuration:0.5 animations:^{self.highLightedNote.alpha = 0;} completion:^(BOOL finished){
-        [self.notes removeObject:self.highLightedNote];
-        self.highLightedNote.highlighted = NO;
-        [self.highLightedNote removeFromSuperview];
-        self.unstackCounter++;
-        [self.delegate unstackItem:self.highLightedNote
-                          fromView:self.openStack 
-                     withPastCount:self.unstackCounter];
-        [self removeToolbarItems];
-        self.editing = NO;
-        self.highLightedNote = nil;
-        [self layoutNotes: YES];
+     
         
         
     }];

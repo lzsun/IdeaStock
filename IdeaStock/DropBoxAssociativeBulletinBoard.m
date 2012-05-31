@@ -24,7 +24,7 @@
 #define ACTION_TYPE_UPLOAD_FILE @"uploadFile"
 
 
-#define SYNCHRONIZATION_PERIOD 5
+#define SYNCHRONIZATION_PERIOD 2
 @interface DropBoxAssociativeBulletinBoard()
 
 /*--------------------------------------------------
@@ -121,7 +121,7 @@ _needSynchronization;
 
 -(void) synchronize:(NSTimer *) timer{
     
-    NSLog(@"Periodic Queue: %@",((DropboxDataModel *) self.dataModel).actions);
+//    NSLog(@"Periodic Queue: %@",((DropboxDataModel *) self.dataModel).actions);
     if (self.actionInProgress){
         NSLog(@"Synchronization postponed due to an unfinished or failed action");
         return;

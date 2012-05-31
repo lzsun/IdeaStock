@@ -44,6 +44,7 @@
 @property (weak, nonatomic) UIView<BulletinBoardObject> * highlightedView;
 @property (nonatomic) BOOL editMode;
 @property int panCounter ;
+@property BOOL isRefreshing;
 
 @end
 
@@ -73,6 +74,7 @@
 @synthesize bulletinBoardName = _bulletinBoardName;
 @synthesize noteCount = _noteCount;
 @synthesize endActivityIndicator = _endActivityIndicator;
+@synthesize isRefreshing = _isRefreshing;
 
 -(DropBoxAssociativeBulletinBoard *) board{
     
@@ -342,6 +344,7 @@
 
     NSLog(@"Reading Bulletinboard data from the filesytem");
     NSLog(@"----------------------------");
+    self.isRefreshing = NO;
     [self layoutNotes];
 }
 
@@ -350,6 +353,8 @@
  -----------------------------------------------------------*/
 
 -(void) layoutNotes{
+    
+    NSLog(@"Laying out Notes");
     for(UIView * view in self.bulletinboardView.subviews){
         [view removeFromSuperview];
     }
@@ -420,6 +425,7 @@
 }
 
 -(void) layoutStackings{
+    NSLog(@"Laying Stackings");
     NSDictionary * stackings =[self.board getAllBulletinBoardAttributeNamesOfType:STACKING_TYPE];
     for(NSString * stackingID in stackings){
         NSMutableArray * views = [[NSMutableArray alloc] init];
@@ -671,11 +677,31 @@
     return _intersectingViews;
 }
 
+#define OVERLAP_RATIO 0.35
+-(BOOL) does: (UIView *) view1 OverlapWithView: (UIView *) view2{
+    
+    CGPoint view1Center = CGPointMake(view1.frame.origin.x + (view1.frame.size.width/2), 
+                                        view1.frame.origin.y + (view1.frame.size.height/2) );
+    CGPoint view2Center = CGPointMake(view2.frame.origin.x + (view2.frame.size.width/2), 
+                                      view2.frame.origin.y + (view2.frame.size.height/2) );
+    
+    CGFloat dx = view1Center.x - view2Center.x;
+    CGFloat dy = view1Center.y - view2Center.y;
+    
+    float distance = sqrt(dx*dx + dy*dy);
+    if ( distance < OVERLAP_RATIO * NOTE_WIDTH){
+        return YES;
+    }
+    return NO;
+                    
+}
+    
 -(NSArray *) checkForOverlapWithView: (UIView *) senderView{
     NSMutableArray * ans = [[NSMutableArray alloc] init];
     for (UIView * view in self.bulletinboardView.subviews){
         if (view != senderView && [view conformsToProtocol:@protocol(BulletinBoardObject)]){
-            if (CGRectIntersectsRect(view.frame,senderView.frame)){
+            
+            if ([self does:view OverlapWithView:senderView]){
                 [ans addObject:view];
                 
             }
@@ -1084,7 +1110,7 @@
     [self.endActivityIndicator startAnimating];
     
 
-    [self performSelector:@selector(close) withObject:nil afterDelay:1];
+    [self performSelector:@selector(close) withObject:nil afterDelay:2 ];
     
 }
 
@@ -1105,6 +1131,10 @@
 }
 
 - (IBAction)refreshPressed:(id)sender {
+    
+    if (self.isRefreshing) return;
+    
+    self.isRefreshing = YES;
     self.board = [[DropBoxAssociativeBulletinBoard alloc] initBulletinBoardFromXoomlWithName:self.bulletinBoardName];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(loadSavedNotes:)
