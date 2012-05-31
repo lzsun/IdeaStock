@@ -155,6 +155,7 @@
 #define PORTRAIT_COL_COUNT 4
 #define LANDSCAPE_ROW_COUNT 4
 #define LANDSCAPE_COL_COUNT 3
+
 //ROW AND COL ARE USED IN REVERSE ! 
 -(void) layoutBulletinBoards: (BOOL) animation withDuration: (float) duration{
     
@@ -175,6 +176,7 @@
         || [UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown 
         || [UIDevice currentDevice].orientation == UIDeviceOrientationFaceUp 
         || [UIDevice currentDevice].orientation ==  UIDeviceOrientationUnknown){
+        
         int numPages = self.bulletinBoardViews.count / (PORTRAIT_ROW_COUNT * PORTRAIT_COL_COUNT);
         int remainder = self.bulletinBoardViews.count % (PORTRAIT_COL_COUNT * PORTRAIT_ROW_COUNT);
         if ( remainder ==  0 ) numPages --;
@@ -428,7 +430,7 @@
 
 
 /*------------------------------------------------
-                    Notifications
+ Notifications
  -------------------------------------------------*/
 
 -(void) bulletinBoardsRead: (NSNotification *) notification{
@@ -521,7 +523,7 @@
 
 -(void) viewDidLoad{
     
-
+    
     
     [super viewDidLoad];
     

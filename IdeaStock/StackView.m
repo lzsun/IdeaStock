@@ -7,7 +7,7 @@
 //
 
 #import "StackView.h"
-
+#import "ImageView.h"
 
 @interface StackView()
 
@@ -15,13 +15,18 @@
 
 
 /*------------------------------------------------
-                    UI properties
+ UI properties
  -------------------------------------------------*/
 
 
 @property (strong,nonatomic) UIImage * normalImage;
 @property (strong, nonatomic) UIImage * highlightedImage;
 @property CGRect originalFrame;
+
+/*------------------------------------------------
+ layout properties
+ -------------------------------------------------*/
+
 
 @end
 
@@ -32,7 +37,7 @@
 
 
 /*------------------------------------------------
-                    Synthesizers
+ Synthesizers
  -------------------------------------------------*/
 
 @synthesize views = _views;
@@ -43,6 +48,7 @@
 @synthesize highlightedImage = _highlightedImage;
 @synthesize ID = _ID;
 @synthesize originalFrame = _originalFrame;
+
 
 
 #define STARTING_POS_OFFSET_X 0.05
@@ -56,21 +62,44 @@
     }
     return _normalImage;
 }
+#define IMG_OFFSET_X_RATE 0.009
+#define IMG_OFFSET_Y_RATE 0.118
+#define IMG_SIZE_WIDTH_RATIO 0.89
+#define IMG_SIZE_HEIGHT_RATIO 0.86
 
+-(void) layImage: (UIImage *) img{
+    for (UIView * view in self.subviews){
+        if ([view isKindOfClass:[UIImageView class]]){
+            
+            for(UIView * lastImage in view.subviews){
+                if ([lastImage isKindOfClass:[UIImageView class]]){
+                    [lastImage removeFromSuperview];
+                }
+            }
+            UIImageView * newImage = [[UIImageView alloc] initWithImage:img];
+            newImage.frame = CGRectMake(view.frame.origin.x + view.frame.size.width * IMG_OFFSET_X_RATE,
+                                        view.frame.origin.y + view.frame.size.height * IMG_OFFSET_Y_RATE,
+                                        view.frame.size.width * IMG_SIZE_WIDTH_RATIO,
+                                        view.frame.size.height * IMG_SIZE_HEIGHT_RATIO);
+            [view addSubview:newImage];
+
+        }
+    }
+}
 -(UIImage *) highlightedImage{
     if (!_highlightedImage){
         _highlightedImage = [UIImage imageNamed:@"stackSelected.png"];
     }
-return _highlightedImage;
+    return _highlightedImage;
 }
 
 -(void) setHighlighted:(BOOL) highlighted{
     
     _highlighted = highlighted;
-
+    
     for (UIView * subView in self.subviews){
         if (highlighted){
-
+            
             if ([subView isKindOfClass:[UIImageView class]]){
                 [((UIImageView *) subView) setImage:self.highlightedImage];
                 [UIView animateWithDuration:0.20 animations:^{[subView setTransform:CGAffineTransformMakeScale(1.3, 1.4)];}];                              
@@ -81,7 +110,7 @@ return _highlightedImage;
                 [((UIImageView *) subView) setImage:self.normalImage];
                 [UIView animateWithDuration:0.20 animations:^{[subView setTransform:CGAffineTransformIdentity];}];
             }
-
+            
         }
     }
 }
@@ -100,7 +129,7 @@ return _highlightedImage;
 
 
 /*------------------------------------------------
-                    Initializers
+ Initializers
  -------------------------------------------------*/
 
 -(id) initWithViews: (NSMutableArray *) views 
@@ -110,7 +139,7 @@ return _highlightedImage;
     
     self = [super initWithFrame:frame];
     if (self){
-        self.mainView = mainView;
+        
         self.views = views;
         UIImage * image = self.normalImage;
         UIImageView * imageView = [[UIImageView alloc]initWithImage:image];
@@ -126,15 +155,40 @@ return _highlightedImage;
         textView.editable = NO;
         [self addSubview:imageView];
         [self addSubview:textView];
+        
+        if ([mainView isKindOfClass:[ImageView class]]){
+            [self layImage:((ImageView *) mainView).image];
+            self.mainView = mainView;
+            return self;
+        }
+        else {
+            
+            ImageView * topView = nil;
+            for (UIView * view in self.views){
+                if ([view isKindOfClass:[ImageView class]]){
+                    topView = (ImageView *)view;
+                    break;
+                }
+            }
+            
+            if (topView != nil){
+                [self layImage:topView.image];
+                self.mainView = topView;
+                return self;;
+            }
+            
+        }
+        //the plain mainView is ont top
         self.text= mainView.text;
         self.originalFrame = self.frame;
+        self.mainView = mainView;
     }
     return self;    
     
 }
 
 /*------------------------------------------------
-                    Layout Methods
+ Layout Methods
  -------------------------------------------------*/
 
 -(void) scale:(CGFloat) scaleFactor{
@@ -176,13 +230,47 @@ return _highlightedImage;
             
         }
     }
-
+    
     
 }
 
 
+-(void) removeMainViewImage{
+    
+    if ([self.mainView isKindOfClass:[ImageView class]]){
+        for (UIView * view in self.subviews){
+            if ([view isKindOfClass:[UIImageView class]]){
+                for (UIView * lastImg in view.subviews){
+                    if ([lastImg isKindOfClass:[UIImageView class]]){
+                        [lastImg removeFromSuperview];
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
 -(void) setNextMainView{
+    
+    [self removeMainViewImage];
     [self.views removeObject:self.mainView];
+    
+    ImageView * topView = nil;
+    for (UIView * view in self.views){
+        if ([view isKindOfClass:[ImageView class]]){
+            topView = (ImageView *) view;
+            break;
+        }
+        
+    }
+    if (topView != nil){
+        [self layImage:topView.image];
+        self.mainView = topView;
+        [self setText:topView.text];
+        return;
+    }
+    
+
     self.mainView = [self.views lastObject];
     [self setText:((NoteView *)[self.views lastObject]).text];
 }

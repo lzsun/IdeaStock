@@ -36,6 +36,7 @@
 @property (nonatomic) int currentPage;
 @property (nonatomic) int unstackCounter;
 
+
 @end
 
 /*========================================================================*/
@@ -411,6 +412,10 @@
     [UIView animateWithDuration:0.5 animations:^{
         self.highLightedNote.transform = CGAffineTransformScale(self.highLightedNote.transform, 0.05, 0.05);
     }completion:^ (BOOL didFinish){
+        
+        if (self.highLightedNote == self.openStack.mainView){
+            [self.openStack setNextMainView];
+        }
         [self.notes removeObject:self.highLightedNote];
         [self.highLightedNote removeFromSuperview];
         [self removeToolbarItems];
